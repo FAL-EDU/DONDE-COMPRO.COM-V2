@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Producto - DÓNDE COMPRO.COM</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .form-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { text-align: center; color: #2c3e50; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #34495e; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        #preview { 
+            width: 100%; height: 180px; background: #f8f9fa; border: 2px dashed #ccc; 
+            margin-top: 10px; display: flex; align-items: center; justify-content: center; 
+            overflow: hidden; border-radius: 8px; color: #999;
+        }
+        #preview img { width: 100%; height: 100%; object-fit: cover; }
+
+        .btn-subir { 
+            width: 100%; background: #27ae60; color: white; border: none; 
+            padding: 15px; border-radius: 6px; cursor: pointer; 
+            font-weight: bold; font-size: 16px; margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn-subir:hover { background: #219150; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Añadir Nuevo Producto</h2>
+        
+        <label>Nombre del Producto</label>
+        <input type="text" id="nombre" placeholder="Ej: Pañales G x 40">
+        
+        <label>Precio ($)</label>
+        <input type="number" id="precio" placeholder="0.00">
+        
+        <label>Foto del Producto</label>
+        <input type="file" id="foto" accept="image/*">
+        
+        <div id="preview">Vista previa de la imagen</div>
+
+        <button class="btn-subir" id="btnPublicar">GUARDAR Y PUBLICAR</button>
+    </div>
+
+    <script type="module">
+        import { guardarProducto } from '../backend/subir-producto.js';
+
+        const fotoInput = document.getElementById('foto');
+        const preview = document.getElementById('preview');
+
+        // Mostrar vista previa al seleccionar imagen
+        fotoInput.addEventListener('change', () => {
+            const file = fotoInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.innerHTML = `<img src="${e.target.result}">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Evento de clic para subir
+        document.getElementById('btnPublicar').addEventListener('click', async () => {
+            const nombre = document.getElementById('nombre').value;
+            const precio = document.getElementById('precio').value;
+            const archivoFoto = fotoInput.files[0];
+
+            if(nombre && precio && archivoFoto) {
+                document.getElementById('btnPublicar').innerText = "Subiendo...";
+                document.getElementById('btnPublicar').disabled = true;
+                
+                await guardarProducto(nombre, precio, archivoFoto);
+                
+                document.getElementById('btnPublicar').innerText = "GUARDAR Y PUBLICAR";
+                document.getElementById('btnPublicar').disabled = false;
+            } else {
+                alert("Por favor, completa nombre, precio y selecciona una foto.");
+            }
+        });
+    </script>
+</body>
+</html>

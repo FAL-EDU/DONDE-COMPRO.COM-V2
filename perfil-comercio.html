@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil del Comercio - DÓNDE COMPRO.COM</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: #fff; }
+        .comercio-header { background: #f8f9fa; padding: 40px; text-align: center; border-bottom: 2px solid #3498db; }
+        .logo-comercio { width: 120px; height: 120px; border-radius: 50%; background: #ddd; margin-bottom: 15px; }
+        .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 40px; }
+        .item-producto { border: 1px solid #eee; padding: 15px; border-radius: 8px; text-align: center; }
+        .item-producto img { max-width: 100%; border-radius: 4px; }
+        .btn-reserva { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .horario-tag { color: #e67e22; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="comercio-header">
+        <div class="logo-comercio" style="margin: 0 auto; display: flex; align-items: center; justify-content: center;">LOGO</div>
+        <h1>Nombre del Comercio</h1>
+        <p>Dirección: Calle Falsa 123 | Teléfono: 555-0199</p>
+        <p class="horario-tag">Atiende fuera de horario: SÍ</p>
+        <button class="btn-reserva" style="background:#3498db;">Cómo llegar (Maps)</button>
+    </div>
+
+    <div class="catalogo">
+        <div class="item-producto">
+            <img src="https://via.placeholder.com/150" alt="Producto">
+            <h4>Producto Ejemplo</h4>
+            <p>$1.200,00</p>
+            <p>Stock: Disponible</p>
+            <button class="btn-reserva">Agregar al Carrito</button>
+        </div>
+    </div>
+</body>
+</html>

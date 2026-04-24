@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>DÓNDE COMPRO.COM - Buscador</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f4f7f6; }
+        header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-bottom: 5px solid #27ae60; }
+        .buscador-container { max-width: 800px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #logo-sitio { max-height: 80px; margin-bottom: 10px; }
+        #fondo-agua { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; background-size: cover; background-position: center; }
+    </style>
+</head>
+<body>
+    <div id="fondo-agua"></div>
+    <header>
+        <img id="logo-sitio" src="https://via.placeholder.com/150?text=Cargando..." alt="Logo">
+        <p>Localización de productos cercanos</p>
+    </header>
+
+    <div class="buscador-container" style="text-align:center;">
+        <input type="text" placeholder="¿Qué buscas?" style="width:70%; padding:10px; border-radius:4px; border:1px solid #ccc;">
+        <button style="padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:4px; cursor:pointer;">BUSCAR</button>
+    </div>
+
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function cargarEstetica() {
+            try {
+                const snap = await getDoc(doc(db, "configuracion", "apariencia"));
+                if (snap.exists()) {
+                    const d = snap.data();
+                    if (d.logoUrl) document.getElementById('logo-sitio').src = d.logoUrl;
+                    if (d.fondoUrl) document.getElementById('fondo-agua').style.backgroundImage = `url('${d.fondoUrl}')`;
+                }
+            } catch (e) { console.log("Configuración no encontrada."); }
+        }
+        cargarEstetica();
+    </script>
+</body>
+</html>

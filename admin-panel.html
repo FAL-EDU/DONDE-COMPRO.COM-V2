@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; display: flex; background: #f4f4f4; }
+        .sidebar { width: 220px; background: #2c3e50; color: white; height: 100vh; padding: 20px; position: fixed; }
+        .sidebar p { cursor: pointer; padding: 12px; border-radius: 5px; }
+        .sidebar p:hover { background: #34495e; color: #2ecc71; }
+        .main { margin-left: 260px; padding: 20px; width: 100%; }
+        .seccion { display: none; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .activa { display: block; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #2ecc71; color: white; border: none; padding: 12px 25px; cursor: pointer; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3 style="color:#2ecc71">ADMIN PANEL</h3>
+        <p onclick="ver('comercios')">Solicitudes</p>
+        <p onclick="ver('estetica')">🎨 Estética App</p>
+        <p onclick="window.location.href='index.html'">Ver Web</p>
+    </div>
+
+    <div class="main">
+        <div id="comercios" class="seccion activa">
+            <h2>Comercios Pendientes</h2>
+            <table border="1" width="100%" style="border-collapse: collapse;"><tbody id="tabla-pendientes"></tbody></table>
+        </div>
+
+        <div id="estetica" class="seccion">
+            <h2>Personalización</h2>
+            <input type="text" id="input-logo-url" placeholder="Link del Logo">
+            <input type="text" id="input-fondo-url" placeholder="Link del Fondo">
+            <button id="btn-guardar-estetica">GUARDAR CAMBIOS</button>
+        </div>
+    </div>
+
+    <script>
+        function ver(id) {
+            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+            document.getElementById(id).classList.add('activa');
+        }
+    </script>
+
+    <script type="module">
+        import { verificarAccesoAdmin } from './admin-auth.js';
+        import { autorizarComercio, guardarConfiguracionVisual, cargarSolicitudes, cargarEsteticaActual } from './admin-logic.js';
+
+        async function iniciar() {
+            const ok = await verificarAccesoAdmin();
+            if (!ok) { window.location.href = 'login.html'; return; }
+            
+            window.autorizarComercio = autorizarComercio;
+            cargarSolicitudes();
+            cargarEsteticaActual();
+            document.getElementById('btn-guardar-estetica').onclick = guardarConfiguracionVisual;
+        }
+        iniciar();
+    </script>
+</body>
+</html>
