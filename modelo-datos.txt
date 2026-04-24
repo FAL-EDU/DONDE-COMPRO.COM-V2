@@ -1,2 +1,0 @@
-
-Colección comercios: Nombre, dirección, coordenadas (Maps), logo, horario y estado de autorización. Colección productos: Nombre, descripción, precio, stock e imagen (vinculada a la que suba el comerciante).Colección pedidos: Número de pedido automático, lista de productos, método de entrega y estado (pendiente/confirmado/entregado).
