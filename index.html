@@ -7,91 +7,50 @@
     <style>
         :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --light: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); color: #333; }
-        
-        header { 
-            background: var(--primary); 
-            color: white; 
-            padding: 50px 20px; 
-            text-align: center; 
-            background-size: cover; 
-            background-position: center;
-        }
-
+        header { background: var(--primary); color: white; padding: 50px 20px; text-align: center; background-size: cover; background-position: center; }
         .logo-container img { max-width: 150px; margin-bottom: 10px; border-radius: 8px; }
-        
-        /* Buscador */
-        .search-container { 
-            background: white; padding: 25px; border-radius: 12px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 85%; max-width: 650px;
-            margin: -40px auto 40px; display: flex; gap: 10px;
-        }
+        .search-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 85%; max-width: 650px; margin: -40px auto 40px; display: flex; gap: 10px; }
         .search-container input { flex-grow: 1; padding: 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
         .search-container button { background: var(--secondary); color: white; border: none; padding: 15px 30px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-
-        /* Botón Registro Comerciante */
         .btn-registro-wrapper { text-align: center; margin: 20px 0; }
-        .btn-registro {
-            background: var(--accent); color: white; padding: 18px 35px;
-            border: none; border-radius: 50px; font-weight: bold;
-            cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
-            transition: 0.3s;
-        }
-        .btn-registro:hover { transform: translateY(-3px); background: #e67e22; }
-
-        /* Estícula de Resultados */
+        .btn-registro { background: var(--accent); color: white; padding: 18px 35px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4); transition: 0.3s; }
         #resultados { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
         .card-comercio { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--secondary); }
-
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .modal-content { background: white; padding: 35px; border-radius: 12px; width: 100%; max-width: 450px; position: relative; box-sizing: border-box; }
         .close { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 28px; color: #999; }
         .modal input, .modal select, .modal textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
         .btn-enviar { width: 100%; background: var(--secondary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
-
     </style>
 </head>
 <body>
 
     <header id="cabecera">
-        <div class="logo-container">
-            <img id="logo-img" src="https://via.placeholder.com/150?text=LOGO" alt="Logo">
-        </div>
+        <div class="logo-container"><img id="logo-img" src="https://via.placeholder.com/150?text=LOGO" alt="Logo"></div>
         <h1 id="titulo-web" style="margin:0; font-size: 1.8rem;">DÓNDE COMPRO</h1>
         <p>Localización de productos cercanos</p>
     </header>
 
     <div class="search-container">
-        <input type="text" id="inputBusqueda" placeholder="¿Qué buscas? (ej: Pan, Farmacia, Ropa)">
+        <input type="text" id="inputBusqueda" placeholder="¿Qué buscas?">
         <button id="btnBuscar">BUSCAR</button>
     </div>
 
     <div class="btn-registro-wrapper">
-        <button class="btn-registro" onclick="document.getElementById('modalSol').style.display='flex'">
-            📢 REGISTRA TU COMERCIO AQUÍ
-        </button>
+        <button class="btn-registro" id="abrirModal">📢 REGISTRA TU COMERCIO AQUÍ</button>
     </div>
 
-    <div id="resultados">
-        </div>
+    <div id="resultados"></div>
 
     <div id="modalSol" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('modalSol').style.display='none'">&times;</span>
+            <span class="close" id="cerrarModal">&times;</span>
             <h2 style="margin-top:0; color: var(--primary);">Solicitud de Admisión</h2>
-            <p style="color: #666; font-size: 0.9rem;">Crea tu espacio y empieza a gestionar tu tienda.</p>
-            
             <input type="text" id="sol-nombre" placeholder="Nombre de la Tienda">
-            
-            <select id="sol-rubro">
-                <option value="">Selecciona tu Rubro...</option>
-                </select>
-
-            <input type="text" id="sol-whatsapp" placeholder="Teléfono / WhatsApp (ej: 3876...)">
-            <input type="password" id="sol-pass" placeholder="Crea tu Contraseña para el panel">
-            
-            <textarea id="sol-mensaje" placeholder="Descripción breve de tu comercio..." style="height: 70px;"></textarea>
-            
+            <select id="sol-rubro"><option value="">Selecciona tu Rubro...</option></select>
+            <input type="text" id="sol-whatsapp" placeholder="Teléfono / WhatsApp">
+            <input type="password" id="sol-pass" placeholder="Crea tu Contraseña">
+            <textarea id="sol-mensaje" placeholder="Descripción breve..." style="height: 70px;"></textarea>
             <button id="btnEnviarSol" class="btn-enviar">ENVIAR SOLICITUD</button>
         </div>
     </div>
@@ -100,28 +59,21 @@
         import { db } from './firebase-config.js';
         import { collection, addDoc, doc, getDoc, getDocs, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. CARGAR CONFIGURACIÓN VISUAL (ESTÉTICA)
-        async function cargarEstetica() {
-            const docSnap = await getDoc(doc(db, "configuracion", "apariencia"));
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if(data.logoUrl) document.getElementById('logo-img').src = data.logoUrl;
-                if(data.fondoUrl) document.getElementById('cabecera').style.backgroundImage = `url('${data.fondoUrl}')`;
-            }
-        }
-        cargarEstetica();
+        // Abrir/Cerrar Modal
+        const modal = document.getElementById('modalSol');
+        document.getElementById('abrirModal').onclick = () => modal.style.display = 'flex';
+        document.getElementById('cerrarModal').onclick = () => modal.style.display = 'none';
 
-        // 2. CARGAR RUBROS EN EL MODAL PARA EL COMERCIANTE
+        // Cargar Rubros en el Select
         onSnapshot(collection(db, "rubros"), (snap) => {
             const select = document.getElementById('sol-rubro');
             select.innerHTML = '<option value="">Selecciona tu Rubro...</option>';
             snap.forEach(d => {
-                const r = d.data().nombre;
-                select.innerHTML += `<option value="${r}">${r}</option>`;
+                select.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`;
             });
         });
 
-        // 3. ENVIAR SOLICITUD DE ADMISIÓN
+        // FUNCIÓN ENVIAR SOLICITUD (CORREGIDA)
         document.getElementById('btnEnviarSol').onclick = async () => {
             const nombre = document.getElementById('sol-nombre').value;
             const rubro = document.getElementById('sol-rubro').value;
@@ -130,7 +82,7 @@
             const mensaje = document.getElementById('sol-mensaje').value;
 
             if(!nombre || !rubro || !whatsapp || !pass) {
-                return alert("Por favor completa todos los campos obligatorios");
+                return alert("Por favor completa Nombre, Rubro, WhatsApp y Contraseña.");
             }
 
             try {
@@ -139,22 +91,39 @@
                     fecha: new Date().toLocaleString(),
                     estado: "pendiente"
                 });
-                alert("¡Solicitud enviada! El administrador revisará tus datos para darte el alta.");
-                document.getElementById('modalSol').style.display = 'none';
+                alert("¡Solicitud enviada con éxito! El administrador te contactará.");
+                modal.style.display = 'none';
+                // Limpiar campos
+                document.getElementById('sol-nombre').value = "";
+                document.getElementById('sol-whatsapp').value = "";
+                document.getElementById('sol-pass').value = "";
+                document.getElementById('sol-mensaje').value = "";
             } catch (e) {
-                alert("Hubo un error al enviar la solicitud.");
+                console.error("Error: ", e);
+                alert("Error al enviar la solicitud.");
             }
         };
 
-        // 4. MOTOR DE BÚSQUEDA DE COMERCIOS
+        // Buscador
         document.getElementById('btnBuscar').onclick = async () => {
             const busqueda = document.getElementById('inputBusqueda').value.toLowerCase();
             const resultadosDiv = document.getElementById('resultados');
-            resultadosDiv.innerHTML = "<p>Buscando comercios...</p>";
-
-            const querySnapshot = await getDocs(collection(db, "comercios"));
+            const q = query(collection(db, "comercios"));
+            const snap = await getDocs(q);
             resultadosDiv.innerHTML = "";
-            
-            let encontrados = 0;
-            querySnapshot.forEach((doc) => {
+            snap.forEach(doc => {
                 const c = doc.data();
+                if(c.nombre.toLowerCase().includes(busqueda) || c.rubro.toLowerCase().includes(busqueda)) {
+                    resultadosDiv.innerHTML += `
+                        <div class="card-comercio">
+                            <span style="font-size: 0.7rem; color: #999;">${c.rubro}</span>
+                            <h3>${c.nombre}</h3>
+                            <p>📍 ${c.direccion || 'Consultar'}</p>
+                            <a href="https://wa.me/${c.whatsapp}" target="_blank" style="background:#25d366; color:white; padding:8px 12px; border-radius:5px; text-decoration:none;">WhatsApp 📱</a>
+                        </div>`;
+                }
+            });
+        };
+    </script>
+</body>
+</html>
