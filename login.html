@@ -3,33 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ingreso al Sistema - DONDE-COMPRO</title>
+    <title>Ingreso - DÓNDE COMPRO</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 350px; text-align: center; }
-        h2 { color: #2c3e50; margin-bottom: 10px; }
-        p { color: #666; font-size: 0.9rem; margin-bottom: 25px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; margin-top: 10px; }
-        button:hover { background: #2ecc71; transform: translateY(-2px); }
-        .footer-links { margin-top: 20px; font-size: 0.8rem; }
-        .footer-links a { color: #3498db; text-decoration: none; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --light: #f4f7f6; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--primary); 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; 
+        }
+        .login-card { 
+            background: white; padding: 40px; border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 350px; 
+            text-align: center; 
+        }
+        .login-card h2 { color: var(--primary); margin-bottom: 25px; }
+        input { 
+            width: 100%; padding: 12px; margin: 10px 0; 
+            border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; 
+        }
+        .btn-ingresar { 
+            width: 100%; padding: 15px; background: var(--secondary); 
+            color: white; border: none; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1rem;
+        }
+        .btn-ingresar:hover { background: #219150; }
+        .back-link { display: block; margin-top: 20px; color: #666; text-decoration: none; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <h2>Bienvenido</h2>
-        <p>Ingresa como Administrador o Comercio</p>
+        <img src="https://via.placeholder.com/80?text=LOGO" id="logo-login" style="margin-bottom: 15px; border-radius: 8px;">
+        <h2>Iniciar Sesión</h2>
         
-        <input type="text" id="userInput" placeholder="Correo o Usuario de Comercio">
-        <input type="password" id="passInput" placeholder="Contraseña">
+        <input type="text" id="user-input" placeholder="Usuario o Correo">
+        <input type="password" id="pass-input" placeholder="Contraseña">
         
-        <button id="btnIngresar">INGRESAR AL PANEL</button>
-
-        <div class="footer-links">
-            <a href="index.html">← Volver a la web principal</a>
-        </div>
+        <button id="btn-login" class="btn-ingresar">INGRESAR AL PANEL</button>
+        
+        <a href="index.html" class="back-link">← Volver al buscador</a>
     </div>
 
     <script type="module">
@@ -37,42 +50,42 @@
         import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const btnIngresar = document.getElementById('btnIngresar');
+        document.getElementById('btn-login').onclick = async () => {
+            const user = document.getElementById('user-input').value.trim();
+            const pass = document.getElementById('pass-input').value;
 
-        btnIngresar.addEventListener('click', async () => {
-            const user = document.getElementById('userInput').value.trim();
-            const pass = document.getElementById('passInput').value;
+            if(!user || !pass) return alert("Completa tus credenciales");
 
-            if (!user || !pass) return alert("Por favor completa los campos");
-
-            // --- CASO 1: ES EL SUPER ADMINISTRADOR (Usa Email) ---
-            if (user.includes('@')) {
+            // 1. INTENTO COMO ADMINISTRADOR (Si usa un correo con @)
+            if(user.includes('@')) {
                 try {
                     await signInWithEmailAndPassword(auth, user, pass);
                     window.location.href = 'admin-panel.html';
-                } catch (error) {
-                    alert("Error de Administrador: " + error.message);
+                } catch (e) {
+                    alert("Error: Usuario o clave de administrador incorrecta.");
                 }
             } 
-            // --- CASO 2: ES UN COMERCIANTE (Usa nombre de usuario) ---
+            // 2. INTENTO COMO COMERCIANTE (Busca en la colección de comercios)
             else {
                 try {
-                    const q = query(collection(db, "comercios"), where("usuario", "==", user), where("password", "==", pass));
-                    const querySnapshot = await getDocs(q);
+                    const q = query(collection(db, "comercios"), 
+                              where("usuario", "==", user), 
+                              where("password", "==", pass));
+                    
+                    const snap = await getDocs(q);
 
-                    if (!querySnapshot.empty) {
-                        // Guardamos el usuario en el navegador para que el panel sepa quién es
+                    if(!snap.empty) {
+                        // Guardamos el usuario para que el panel sepa quién entró
                         localStorage.setItem('usuarioComercio', user);
                         window.location.href = 'panel-comerciante.html';
                     } else {
-                        alert("Usuario o contraseña de comercio incorrectos.");
+                        alert("Usuario o contraseña de comercio no encontrados.");
                     }
-                } catch (error) {
-                    console.error(error);
-                    alert("Error al validar comercio.");
+                } catch (e) {
+                    alert("Error al validar credenciales.");
                 }
             }
-        });
+        };
     </script>
 </body>
 </html>
