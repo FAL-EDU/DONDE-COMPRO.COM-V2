@@ -3,77 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - DÓNDE COMPRO</title>
+    <title>Súper Admin - DÓNDE COMPRO</title>
     <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #ecf0f1; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #ecf0f1; --accent: #f39c12; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); height: 100vh; }
         
-        /* Sidebar */
         .sidebar { width: 250px; background: var(--primary); color: white; padding: 20px; flex-shrink: 0; }
         .sidebar h2 { color: #2ecc71; font-size: 1.2rem; margin-bottom: 30px; border-bottom: 1px solid #34495e; padding-bottom: 10px; }
         .nav-btn { width: 100%; padding: 12px; margin: 5px 0; background: none; border: none; color: white; text-align: left; cursor: pointer; border-radius: 5px; transition: 0.3s; }
         .nav-btn:hover, .nav-btn.active { background: #34495e; color: #2ecc71; }
 
-        /* Contenido Principal */
         .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
         .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
         .section.active { display: block; }
         
         h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 8px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; }
         
-        /* Formularios y Tablas */
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn-save { background: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .btn-save { background: var(--secondary); color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        .btn-save:hover { background: #219150; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .btn-delete { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+        th { background: #34495e; color: white; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h2>ADMIN PANEL</h2>
-        <button class="nav-btn" onclick="showSection('estetica')">🎨 Estética App</button>
-        <button class="nav-btn" onclick="showSection('rubros')">📁 Gestionar Rubros</button>
-        <button class="nav-btn" onclick="window.location.href='index.html'">🌐 Ver Web</button>
+        <h2>SÚPER ADMIN</h2>
+        <button class="nav-btn" onclick="showSection('estetica')">🎨 Estética General</button>
+        <button class="nav-btn" onclick="showSection('rubros')">📁 Rubros / Categorías</button>
+        <button class="nav-btn active" onclick="showSection('comercios')">🏬 Alta de Comercios</button>
+        <button class="nav-btn" onclick="window.location.href='index.html'">🌐 Ver Web Pública</button>
     </div>
 
     <div class="main-content">
-        <div id="section-estetica" class="section active">
-            <h3>Apariencia del Sitio</h3>
+        <div id="section-estetica" class="section">
+            <h3>Estética de la Aplicación</h3>
             <div class="form-group">
-                <label>URL del Logo (PNG recomendado):</label>
-                <input type="text" id="logoUrl" placeholder="https://ejemplo.com/logo.png">
+                <label>URL del Logo (PNG):</label>
+                <input type="text" id="logoUrl">
             </div>
             <div class="form-group">
-                <label>URL Fondo de Cabecera:</label>
-                <input type="text" id="fondoUrl" placeholder="https://ejemplo.com/fondo.jpg">
+                <label>URL Imagen de Fondo:</label>
+                <input type="text" id="fondoUrl">
             </div>
-            <button class="btn-save" id="btnGuardarEstetica">Guardar Cambios</button>
+            <button class="btn-save" id="btnGuardarEstetica">Actualizar Estética</button>
         </div>
 
         <div id="section-rubros" class="section">
-            <h3>Categorías de Productos (Rubros)</h3>
-            <div class="form-group">
-                <label>Nuevo Rubro:</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="nombre-rubro" placeholder="Ej: Panadería, Farmacia...">
-                    <button class="btn-save" style="margin-top:0" id="btnAgregarRubro">Añadir</button>
-                </div>
+            <h3>Gestión de Rubros</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="nombre-rubro" placeholder="Ejemplo: Carnicería">
+                <button class="btn-save" style="margin:0" id="btnAgregarRubro">Crear Rubro</button>
             </div>
             <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th style="width: 100px;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="lista-rubros">
-                    </tbody>
+                <thead><tr><th>Categoría</th><th>Acción</th></tr></thead>
+                <tbody id="lista-rubros"></tbody>
+            </table>
+        </div>
+
+        <div id="section-comercios" class="section active">
+            <h3>Registrar Comercio y Crear Usuario</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Nombre del Comercio:</label><input type="text" id="com-nombre"></div>
+                <div class="form-group">
+                    <label>Asignar Rubro:</label>
+                    <select id="com-rubro"><option value="">Cargando rubros...</option></select>
+                </div>
+                <div class="form-group"><label>Dirección:</label><input type="text" id="com-direccion"></div>
+                <div class="form-group"><label>WhatsApp (Sin +):</label><input type="text" id="com-whatsapp"></div>
+                
+                <div style="grid-column: 1 / span 2; margin-top:10px; padding-top:10px; border-top: 1px solid #ddd;">
+                    <strong style="color: var(--accent);">🔐 Credenciales de Acceso para el Comerciante</strong>
+                </div>
+                <div class="form-group"><label>Usuario (Ej: perez_panaderia):</label><input type="text" id="com-user"></div>
+                <div class="form-group"><label>Contraseña Temporal:</label><input type="text" id="com-pass"></div>
+            </div>
+            <button class="btn-save" id="btnGuardarComercio">Dar de Alta y Crear Acceso</button>
+
+            <h3 style="margin-top: 40px;">Comercios Activos</h3>
+            <table>
+                <thead><tr><th>Nombre</th><th>Usuario</th><th>Rubro</th><th>Acción</th></tr></thead>
+                <tbody id="lista-comercios"></tbody>
             </table>
         </div>
     </div>
@@ -82,73 +100,86 @@
         import { db } from './firebase-config.js';
         import { doc, setDoc, getDoc, collection, addDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Navegación entre secciones
-        window.showSection = (sectionId) => {
+        // Navegación
+        window.showSection = (id) => {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(`section-${sectionId}`).classList.add('active');
+            document.getElementById(`section-${id}`).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            if(event) event.target.classList.add('active');
         };
 
-        // --- LÓGICA DE ESTÉTICA ---
-        const btnGuardarEstetica = document.getElementById('btnGuardarEstetica');
-        btnGuardarEstetica.onclick = async () => {
-            const logo = document.getElementById('logoUrl').value;
-            const fondo = document.getElementById('fondoUrl').value;
-            try {
-                await setDoc(doc(db, "configuracion", "apariencia"), {
-                    logoUrl: logo,
-                    fondoUrl: fondo
-                });
-                alert("¡Estética actualizada!");
-            } catch (e) { alert("Error al guardar"); }
+        // --- ESTÉTICA ---
+        document.getElementById('btnGuardarEstetica').onclick = async () => {
+            await setDoc(doc(db, "configuracion", "apariencia"), {
+                logoUrl: document.getElementById('logoUrl').value,
+                fondoUrl: document.getElementById('fondoUrl').value
+            });
+            alert("Estética actualizada con éxito");
         };
 
-        // --- LÓGICA DE RUBROS ---
-        const btnAgregarRubro = document.getElementById('btnAgregarRubro');
-        const inputRubro = document.getElementById('nombre-rubro');
-
-        // Agregar Rubro
-        btnAgregarRubro.onclick = async () => {
-            const nombre = inputRubro.value.trim();
-            if(!nombre) return alert("Escribe un nombre");
-            try {
-                await addDoc(collection(db, "rubros"), { nombre: nombre });
-                inputRubro.value = "";
-            } catch (e) { alert("Error al agregar"); }
+        // --- RUBROS ---
+        document.getElementById('btnAgregarRubro').onclick = async () => {
+            const nom = document.getElementById('nombre-rubro').value;
+            if(nom) await addDoc(collection(db, "rubros"), { nombre: nom });
+            document.getElementById('nombre-rubro').value = "";
         };
 
-        // Escuchar cambios en Rubros (Tiempo Real)
-        onSnapshot(collection(db, "rubros"), (snapshot) => {
+        onSnapshot(collection(db, "rubros"), (snap) => {
             const tabla = document.getElementById('lista-rubros');
+            const selectCom = document.getElementById('com-rubro');
             tabla.innerHTML = "";
-            snapshot.forEach((docSnap) => {
-                const rubro = docSnap.data();
-                const fila = `
-                    <tr>
-                        <td>${rubro.nombre}</td>
-                        <td><button class="btn-delete" onclick="eliminarRubro('${docSnap.id}')">Borrar</button></td>
-                    </tr>
-                `;
-                tabla.innerHTML += fila;
+            selectCom.innerHTML = '<option value="">Seleccione un rubro...</option>';
+            snap.forEach(d => {
+                tabla.innerHTML += `<tr><td>${d.data().nombre}</td><td><button class="btn-delete" onclick="eliminar('rubros','${d.id}')">Eliminar</button></td></tr>`;
+                selectCom.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`;
             });
         });
 
-        // Función global para eliminar
-        window.eliminarRubro = async (id) => {
-            if(confirm("¿Eliminar este rubro?")) {
-                try {
-                    await deleteDoc(doc(db, "rubros", id));
-                } catch (e) { alert("Error al eliminar"); }
-            }
+        // --- COMERCIOS (ALTA COMPLETA) ---
+        document.getElementById('btnGuardarComercio').onclick = async () => {
+            const nombre = document.getElementById('com-nombre').value;
+            const user = document.getElementById('com-user').value;
+            const pass = document.getElementById('com-pass').value;
+            
+            if(!nombre || !user || !pass) return alert("Por favor completa los campos de nombre, usuario y contraseña");
+
+            const datosComercio = {
+                nombre: nombre,
+                rubro: document.getElementById('com-rubro').value,
+                direccion: document.getElementById('com-direccion').value,
+                whatsapp: document.getElementById('com-whatsapp').value,
+                usuario: user,
+                password: pass,
+                rol: "comerciante"
+            };
+
+            try {
+                // Guardamos en la colección 'comercios'
+                await addDoc(collection(db, "comercios"), datosComercio);
+                alert("¡Comercio registrado! Ya puede ingresar con su usuario.");
+                document.querySelectorAll('.form-grid input').forEach(i => i.value = "");
+            } catch (e) { alert("Error al registrar"); }
         };
 
-        // Cargar datos iniciales de estética
+        onSnapshot(collection(db, "comercios"), (snap) => {
+            const tabla = document.getElementById('lista-comercios');
+            tabla.innerHTML = "";
+            snap.forEach(d => {
+                const c = d.data();
+                tabla.innerHTML += `<tr><td>${c.nombre}</td><td>${c.usuario}</td><td>${c.rubro}</td><td><button class="btn-delete" onclick="eliminar('comercios','${d.id}')">Baja</button></td></tr>`;
+            });
+        });
+
+        window.eliminar = async (coll, id) => {
+            if(confirm("¿Estás seguro? Esta acción no se puede deshacer.")) await deleteDoc(doc(db, coll, id));
+        };
+
+        // Cargar estética inicial
         const cargar = async () => {
-            const docSnap = await getDoc(doc(db, "configuracion", "apariencia"));
-            if (docSnap.exists()) {
-                document.getElementById('logoUrl').value = docSnap.data().logoUrl || "";
-                document.getElementById('fondoUrl').value = docSnap.data().fondoUrl || "";
+            const d = await getDoc(doc(db, "configuracion", "apariencia"));
+            if(d.exists()){
+                document.getElementById('logoUrl').value = d.data().logoUrl || "";
+                document.getElementById('fondoUrl').value = d.data().fondoUrl || "";
             }
         };
         cargar();
