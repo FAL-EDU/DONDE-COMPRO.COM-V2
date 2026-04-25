@@ -69,29 +69,28 @@
         <button id="btnEntrar">INGRESAR AL PANEL</button>
         <div id="mensaje-error" class="error-msg">Usuario o contraseña incorrectos</div>
     </div>
-
     <script type="module">
         // Importamos la configuración desde la misma carpeta raíz
-        import { auth } from 'firebase-config.js';
-        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { auth } from './firebase-config.js';
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const btnEntrar = document.getElementById('btnEntrar');
-        const errorMsg = document.getElementById('mensaje-error');
+    console.log("Sistema de Login cargado correctamente"); // Esto debe salir en la consola al abrir
 
-        btnEntrar.onclick = async () => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            
-            // Limpiamos mensajes previos
-            errorMsg.style.display = 'none';
+    const btnEntrar = document.getElementById('btnEntrar');
 
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                // Si el login es correcto, nos manda al panel de admin
-                window.location.href = 'admin-panel.html';
-            } catch (error) {
-                console.error("Error de login:", error);
-                errorMsg.style.display = 'block';
+    btnEntrar.addEventListener('click', async () => {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        
+        console.log("Intentando ingresar con:", email);
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+            console.log("Login exitoso:", userCredential.user);
+            window.location.href = 'admin-panel.html';
+        } catch (error) {
+            console.error("Error detallado de Firebase:", error.code, error.message);
+            alert("Error: " + error.message);
             }
         };
     </script>
