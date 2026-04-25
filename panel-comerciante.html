@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Comerciante - DÓNDE COMPRO</title>
+    <style>
+        :root { --primary: #2c3e50; --secondary: #27ae60; --light: #ecf0f1; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-update { background: var(--secondary); color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        .header-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-logout { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-panel">
+            <h2 id="saludo-comercio">Panel de Comercio</h2>
+            <a href="index.html" class="btn-logout">Cerrar Sesión</a>
+        </div>
+
+        <div id="formulario-edicion">
+            <h3>Actualizar mis Datos Públicos</h3>
+            <div class="form-group">
+                <label>Nombre del Negocio:</label>
+                <input type="text" id="edit-nombre">
+            </div>
+            <div class="form-group">
+                <label>Dirección:</label>
+                <input type="text" id="edit-direccion">
+            </div>
+            <div class="form-group">
+                <label>WhatsApp (Sin +):</label>
+                <input type="text" id="edit-whatsapp">
+            </div>
+            <button class="btn-update" id="btnActualizar">Guardar Cambios en mi Tienda</button>
+        </div>
+        
+        <hr style="margin: 30px 0;">
+        <h3>Mis Productos / Ofertas</h3>
+        <p style="color: #666;">(Próximamente: Aquí podrás subir tus productos)</p>
+    </div>
+
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 1. Obtener el usuario que se logueó (lo guardaremos en el login en el siguiente paso)
+        const usuarioLogueado = localStorage.getItem('usuarioComercio');
+        let docIdActual = "";
+
+        if (!usuarioLogueado) {
+            alert("No has iniciado sesión");
+            window.location.href = 'login.html';
+        }
+
+        // 2. Cargar datos del comercio actual
+        const cargarDatos = async () => {
+            const q = query(collection(db, "comercios"), where("usuario", "==", usuarioLogueado));
+            const querySnapshot = await getDocs(q);
+            
+            querySnapshot.forEach((docSnap) => {
+                docIdActual = docSnap.id;
+                const data = docSnap.data();
+                document.getElementById('saludo-comercio').innerText = "Hola, " + data.nombre;
+                document.getElementById('edit-nombre').value = data.nombre;
+                document.getElementById('edit-direccion').value = data.direccion;
+                document.getElementById('edit-whatsapp').value = data.whatsapp;
+            });
+        };
+
+        // 3. Botón Actualizar
+        document.getElementById('btnActualizar').onclick = async () => {
+            try {
+                const ref = doc(db, "comercios", docIdActual);
+                await updateDoc(ref, {
+                    nombre: document.getElementById('edit-nombre').value,
+                    direccion: document.getElementById('edit-direccion').value,
+                    whatsapp: document.getElementById('edit-whatsapp').value
+                });
+                alert("¡Datos actualizados correctamente!");
+            } catch (e) {
+                alert("Error al actualizar");
+            }
+        };
+
+        cargarDatos();
+    </script>
+</body>
+</html>
