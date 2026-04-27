@@ -8,7 +8,6 @@
         :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --light: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); color: #333; }
         
-        /* Header con botón de ingreso */
         header { 
             background: var(--primary); 
             color: white; 
@@ -55,12 +54,13 @@
         #resultados { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
         .card-comercio { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--secondary); }
 
-        /* Modal */
+        /* Modal Actualizado con Dirección */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .modal-content { background: white; padding: 35px; border-radius: 12px; width: 100%; max-width: 450px; position: relative; box-sizing: border-box; }
         .close { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 28px; color: #999; }
-        .modal input, .modal select, .modal textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        .btn-enviar { width: 100%; background: var(--secondary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .modal h2 { margin-top: 0; color: var(--primary); font-size: 1.5rem; margin-bottom: 15px; }
+        .modal input, .modal select, .modal textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .btn-enviar { width: 100%; background: var(--secondary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -76,7 +76,7 @@
     </header>
 
     <div class="search-container">
-        <input type="text" id="inputBusqueda" placeholder="¿Qué buscas? (ej: Pan, Farmacia)">
+        <input type="text" id="inputBusqueda" placeholder="¿Qué buscas? (ej: Farmacia, Pan, Ropa)">
         <button id="btnBuscar">BUSCAR</button>
     </div>
 
@@ -91,26 +91,35 @@
     <div id="modalSol" class="modal">
         <div class="modal-content">
             <span class="close" id="cerrarModal">&times;</span>
-            <h2 style="margin-top:0; color: var(--primary);">Solicitud de Admisión</h2>
+            <h2>Solicitud de Admisión</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">Crea tu espacio y empieza a gestionar tu tienda.</p>
+            
             <input type="text" id="sol-nombre" placeholder="Nombre de la Tienda">
-            <select id="sol-rubro"><option value="">Selecciona tu Rubro...</option></select>
-            <input type="text" id="sol-whatsapp" placeholder="Teléfono / WhatsApp">
-            <input type="password" id="sol-pass" placeholder="Crea tu Contraseña">
-            <textarea id="sol-mensaje" placeholder="Descripción breve..." style="height: 70px;"></textarea>
+            
+            <select id="sol-rubro">
+                <option value="">Selecciona tu Rubro...</option>
+                </select>
+
+            <input type="text" id="sol-direccion" placeholder="Dirección del Local">
+            <input type="text" id="sol-whatsapp" placeholder="Teléfono / WhatsApp (ej: 3876...)">
+            <input type="password" id="sol-pass" placeholder="Crea tu Contraseña de ingreso">
+            
+            <textarea id="sol-mensaje" placeholder="Descripción breve de tu comercio..." style="height: 70px;"></textarea>
+            
             <button id="btnEnviarSol" class="btn-enviar">ENVIAR SOLICITUD</button>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, addDoc, doc, getDoc, getDocs, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, addDoc, doc, getDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Lógica de Modal
+        // Abrir/Cerrar Modal
         const modal = document.getElementById('modalSol');
         document.getElementById('abrirModal').onclick = () => modal.style.display = 'flex';
         document.getElementById('cerrarModal').onclick = () => modal.style.display = 'none';
 
-        // Cargar Estética
+        // Cargar Estética Dinámica
         async function cargarEstetica() {
             const docSnap = await getDoc(doc(db, "configuracion", "apariencia"));
             if (docSnap.exists()) {
@@ -121,7 +130,7 @@
         }
         cargarEstetica();
 
-        // Cargar Rubros
+        // Cargar Rubros Disponibles
         onSnapshot(collection(db, "rubros"), (snap) => {
             const select = document.getElementById('sol-rubro');
             select.innerHTML = '<option value="">Selecciona tu Rubro...</option>';
@@ -130,45 +139,59 @@
             });
         });
 
-        // Enviar Solicitud
+        // ENVIAR SOLICITUD (Incluye campo Dirección)
         document.getElementById('btnEnviarSol').onclick = async () => {
             const nombre = document.getElementById('sol-nombre').value;
             const rubro = document.getElementById('sol-rubro').value;
+            const direccion = document.getElementById('sol-direccion').value;
             const whatsapp = document.getElementById('sol-whatsapp').value;
             const pass = document.getElementById('sol-pass').value;
             const mensaje = document.getElementById('sol-mensaje').value;
 
-            if(!nombre || !rubro || !whatsapp || !pass) return alert("Completa los datos obligatorios");
+            if(!nombre || !rubro || !direccion || !whatsapp || !pass) {
+                return alert("Por favor completa todos los campos obligatorios.");
+            }
 
             try {
                 await addDoc(collection(db, "solicitudes"), {
-                    nombre, rubro, whatsapp, pass, mensaje,
+                    nombre, rubro, direccion, whatsapp, pass, mensaje,
                     fecha: new Date().toLocaleString(),
                     estado: "pendiente"
                 });
-                alert("¡Solicitud enviada!");
+                alert("¡Solicitud enviada! El administrador te dará el alta pronto.");
                 modal.style.display = 'none';
-            } catch (e) { alert("Error al enviar"); }
+                // Limpiar formulario
+                document.querySelectorAll('.modal input, .modal textarea').forEach(i => i.value = "");
+            } catch (e) {
+                alert("Error al enviar la solicitud.");
+            }
         };
 
-        // Buscador
+        // Buscador de Comercios
         document.getElementById('btnBuscar').onclick = async () => {
             const busqueda = document.getElementById('inputBusqueda').value.toLowerCase();
             const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = "<p>Buscando...</p>";
+
             const snap = await getDocs(collection(db, "comercios"));
             resultadosDiv.innerHTML = "";
+            
             snap.forEach(doc => {
                 const c = doc.data();
                 if(c.nombre.toLowerCase().includes(busqueda) || c.rubro.toLowerCase().includes(busqueda)) {
                     resultadosDiv.innerHTML += `
                         <div class="card-comercio">
-                            <span style="font-size: 0.7rem; color: #999;">${c.rubro}</span>
-                            <h3>${c.nombre}</h3>
-                            <p>📍 ${c.direccion || 'Consultar'}</p>
-                            <a href="https://wa.me/${c.whatsapp}" target="_blank" style="background:#25d366; color:white; padding:8px 12px; border-radius:5px; text-decoration:none; font-weight:bold;">WhatsApp 📱</a>
+                            <span style="font-size: 0.7rem; color: #999; text-transform: uppercase;">${c.rubro}</span>
+                            <h3 style="margin: 5px 0; color: var(--primary);">${c.nombre}</h3>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">📍 ${c.direccion || 'Dirección no disponible'}</p>
+                            <a href="https://wa.me/${c.whatsapp}" target="_blank" 
+                               style="display: inline-block; background: #25d366; color: white; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9rem;">
+                                CONSULTAR PRODUCTO 📱
+                            </a>
                         </div>`;
                 }
             });
+            if(resultadosDiv.innerHTML === "") resultadosDiv.innerHTML = "<p>No se encontraron resultados.</p>";
         };
     </script>
 </body>
