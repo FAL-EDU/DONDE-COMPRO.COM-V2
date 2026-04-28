@@ -3,118 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Súper Admin - DÓNDE COMPRO</title>
+    <title>Panel de Administración - DÓNDE COMPRO</title>
     <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #ecf0f1; --accent: #f39c12; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); height: 100vh; overflow: hidden; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
         
-        .sidebar { width: 260px; background: var(--primary); color: white; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; }
-        .sidebar h2 { color: #2ecc71; font-size: 1.1rem; margin-bottom: 30px; border-bottom: 1px solid #34495e; padding-bottom: 10px; text-align: center; }
-        .nav-btn { width: 100%; padding: 12px; margin: 5px 0; background: none; border: none; color: white; text-align: left; cursor: pointer; border-radius: 5px; transition: 0.3s; }
-        .nav-btn:hover, .nav-btn.active { background: #34495e; color: #2ecc71; border-left: 4px solid #2ecc71; }
-
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
-        .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
-        .section.active { display: block; animation: fadeIn 0.3s; }
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; color: var(--primary); }
         
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 8px; margin-bottom: 20px; }
+        /* Botones */
+        .btn-save { background: var(--secondary); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
         
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        
-        .btn-save { background: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-delete { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 3px; cursor: pointer; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
-        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
-        th { background: #f8f9fa; }
+        .section { margin-top: 40px; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
+        .section h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>SÚPER ADMIN</h2>
-        <button class="nav-btn active" onclick="showSection('solicitudes')">📩 Solicitudes</button>
-        <button class="nav-btn" onclick="showSection('comercios')">🏬 Alta de Comercios</button>
-        <button class="nav-btn" onclick="showSection('rubros')">📁 Rubros / Categorías</button>
-        <button class="nav-btn" onclick="showSection('estetica')">🎨 Estética App</button>
-        <div style="margin-top: auto;">
-            <button class="nav-btn" onclick="window.location.href='index.html'" style="color: var(--accent);">🌐 Ver Web Pública</button>
-        </div>
-    </div>
+    <div class="container">
+        <h1>Panel de Control (Admin)</h1>
 
-    <div class="main-content">
-        
-        <div id="section-solicitudes" class="section active">
-            <h3>Solicitudes de Nuevos Comercios</h3>
+        <div class="section">
+            <h2>Solicitudes de Nuevos Comercios</h2>
+            <p>Aquí aparecen quienes enviaron su formulario desde la web principal.</p>
             <table>
                 <thead>
                     <tr>
                         <th>Comercio</th>
-                        <th>Rubro</th>
+                        <th>Dirección</th>
                         <th>WhatsApp</th>
-                        <th>Contraseña Elegida</th>
+                        <th>Mensaje</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
-                <tbody id="lista-solicitudes"></tbody>
+                <tbody id="lista-solicitudes">
+                    </tbody>
             </table>
         </div>
 
-        <div id="section-comercios" class="section">
-            <h3>Dar de Alta Comercio Manual</h3>
-            <div class="form-grid">
-                <input type="text" id="com-nombre" placeholder="Nombre">
-                <select id="com-rubro"></select>
-                <input type="text" id="com-direccion" placeholder="Dirección">
-                <input type="text" id="com-whatsapp" placeholder="WhatsApp">
-                <input type="text" id="com-user" placeholder="Usuario de acceso">
-                <input type="text" id="com-pass" placeholder="Contraseña">
-            </div>
-            <button class="btn-save" id="btnGuardarComercio">Dar de Alta Comercio</button>
-
-            <h3 style="margin-top: 40px;">Comercios Activos</h3>
+        <div class="section">
+            <h2>Comercios Activos</h2>
             <table>
-                <thead><tr><th>Nombre</th><th>Usuario</th><th>Rubro</th><th>Acción</th></tr></thead>
-                <tbody id="lista-comercios"></tbody>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Rubro</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-comercios">
+                    </tbody>
             </table>
         </div>
 
-        <div id="section-rubros" class="section">
-            <h3>Gestión de Rubros</h3>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <input type="text" id="nombre-rubro" placeholder="Nuevo Rubro...">
-                <button class="btn-save" id="btnAgregarRubro">Añadir</button>
-            </div>
-            <table id="tabla-rubros">
-                <thead><tr><th>Nombre</th><th>Acción</th></tr></thead>
-                <tbody id="lista-rubros"></tbody>
-            </table>
+        <div style="margin-top: 20px;">
+            <a href="index.html" style="text-decoration: none; color: var(--primary); font-weight: bold;">← Volver al Inicio</a>
         </div>
-
-        <div id="section-estetica" class="section">
-            <h3>Configuración Visual</h3>
-            <input type="text" id="logoUrl" placeholder="URL Logo PNG" style="margin-bottom: 10px;">
-            <input type="text" id="fondoUrl" placeholder="URL Fondo Cabecera" style="margin-bottom: 10px;">
-            <button class="btn-save" id="btnGuardarEstetica">Guardar Cambios</button>
-        </div>
-
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, doc, addDoc, setDoc, getDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, addDoc, getDocs, doc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        window.showSection = (id) => {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(`section-${id}`).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        };
-
-        // --- GESTIÓN DE SOLICITUDES CON ALTA AUTOMÁTICA ---
+        // 1. ESCUCHAR SOLICITUDES EN TIEMPO REAL
         onSnapshot(collection(db, "solicitudes"), (snap) => {
             const tbody = document.getElementById('lista-solicitudes');
             tbody.innerHTML = "";
@@ -123,75 +80,70 @@
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${s.nombre}</strong></td>
-                        <td>${s.rubro || 'No definido'}</td>
+                        <td>${s.direccion || 'No especificada'}</td>
                         <td>${s.whatsapp}</td>
-                        <td><code>${s.pass || 'Sin clave'}</code></td>
+                        <td><small>${s.mensaje || '-'}</small></td>
                         <td>
-                            <button class="btn-save" onclick="aprobarComercio('${d.id}', '${s.nombre}', '${s.rubro}', '${s.whatsapp}', '${s.pass}')">DAR DE ALTA</button>
-                            <button class="btn-delete" onclick="eliminarDoc('solicitudes','${d.id}')">Borrar</button>
+                            <button class="btn-save" onclick="aprobarComercio('${d.id}', '${s.nombre}', '${s.rubro}', '${s.whatsapp}', '${s.pass}', '${s.direccion}')">
+                                DAR DE ALTA
+                            </button>
+                            <button class="btn-delete" onclick="eliminarDoc('solicitudes','${d.id}')">X</button>
                         </td>
                     </tr>`;
             });
         });
 
-        window.aprobarComercio = async (id, nombre, rubro, whatsapp, pass) => {
-            const usuarioGenerado = nombre.replace(/\s+/g, '_').toLowerCase();
+        // 2. FUNCIÓN PARA DAR DE ALTA AUTOMÁTICAMENTE (Incluye Dirección)
+        window.aprobarComercio = async (id, nombre, rubro, whatsapp, pass, direccion) => {
+            // Generamos un usuario sugerido basado en el nombre
+            const usuarioSugerido = nombre.replace(/\s+/g, '_').toLowerCase();
+            
             try {
+                // Guardamos en la colección oficial de comercios
                 await addDoc(collection(db, "comercios"), {
-                    nombre, rubro, whatsapp, password: pass, usuario: usuarioGenerado,
-                    direccion: "Dirección a completar", rol: "comerciante"
+                    nombre: nombre,
+                    rubro: rubro,
+                    direccion: direccion, // Se carga automáticamente de la solicitud
+                    whatsapp: whatsapp,
+                    password: pass,
+                    usuario: usuarioSugerido,
+                    rol: "comerciante",
+                    fechaAlta: new Date().toLocaleString()
                 });
+
+                // Borramos la solicitud ya procesada
                 await deleteDoc(doc(db, "solicitudes", id));
-                alert("Comercio Activado. Usuario: " + usuarioGenerado);
-            } catch (e) { alert("Error al activar"); }
+                alert("¡Comercio " + nombre + " dado de alta con éxito!");
+            } catch (e) {
+                console.error(e);
+                alert("Error al procesar el alta.");
+            }
         };
 
-        // --- RESTO DE FUNCIONES (RUBROS, COMERCIOS, ESTETICA) ---
-        onSnapshot(collection(db, "rubros"), (snap) => {
-            const tbody = document.getElementById('lista-rubros');
-            const select = document.getElementById('com-rubro');
-            tbody.innerHTML = ""; select.innerHTML = "";
-            snap.forEach(d => {
-                tbody.innerHTML += `<tr><td>${d.data().nombre}</td><td><button class="btn-delete" onclick="eliminarDoc('rubros','${d.id}')">X</button></td></tr>`;
-                select.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`;
-            });
-        });
-
-        document.getElementById('btnAgregarRubro').onclick = async () => {
-            const r = document.getElementById('nombre-rubro').value;
-            if(r) await addDoc(collection(db, "rubros"), { nombre: r });
-            document.getElementById('nombre-rubro').value = "";
-        };
-
+        // 3. LISTAR COMERCIOS ACTIVOS
         onSnapshot(collection(db, "comercios"), (snap) => {
             const tbody = document.getElementById('lista-comercios');
             tbody.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
-                tbody.innerHTML += `<tr><td>${c.nombre}</td><td>${c.usuario}</td><td>${c.rubro}</td><td><button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Baja</button></td></tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${c.nombre}</td>
+                        <td>${c.rubro}</td>
+                        <td><code>${c.usuario}</code></td>
+                        <td>
+                            <button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button>
+                        </td>
+                    </tr>`;
             });
         });
 
-        window.eliminarDoc = async (col, id) => {
-            if(confirm("¿Eliminar?")) await deleteDoc(doc(db, col, id));
-        };
-
-        document.getElementById('btnGuardarEstetica').onclick = async () => {
-            await setDoc(doc(db, "configuracion", "apariencia"), {
-                logoUrl: document.getElementById('logoUrl').value,
-                fondoUrl: document.getElementById('fondoUrl').value
-            });
-            alert("Cambios guardados");
-        };
-
-        const init = async () => {
-            const d = await getDoc(doc(db, "configuracion", "apariencia"));
-            if(d.exists()) {
-                document.getElementById('logoUrl').value = d.data().logoUrl || "";
-                document.getElementById('fondoUrl').value = d.data().fondoUrl || "";
+        // 4. FUNCIÓN GENÉRICA PARA ELIMINAR
+        window.eliminarDoc = async (coleccion, id) => {
+            if(confirm("¿Estás seguro de eliminar este registro?")) {
+                await deleteDoc(doc(db, coleccion, id));
             }
         };
-        init();
     </script>
 </body>
 </html>
