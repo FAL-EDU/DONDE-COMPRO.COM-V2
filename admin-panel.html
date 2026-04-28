@@ -3,34 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - DÓNDE COMPRO</title>
+    <title>Panel de Control - DÓNDE COMPRO</title>
     <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        h1 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --danger: #e74c3c; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1100px; margin: auto; }
         
-        /* Tablas */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f8f9fa; color: var(--primary); }
-        
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; margin-bottom: 30px; }
+        h1 { color: var(--primary); margin: 0; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-left: 5px solid var(--secondary); padding-left: 10px; }
+
+        /* Formularios y Tablas */
+        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; }
+
         /* Botones */
-        .btn-save { background: var(--secondary); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-delete { background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
+        .btn-save { background: var(--secondary); color: white; padding: 10px 20px; }
+        .btn-delete { background: var(--danger); color: white; padding: 6px 10px; font-size: 0.8rem; }
+        .btn-edit { background: var(--accent); color: white; padding: 10px 20px; margin-top: 5px; }
         
-        .section { margin-top: 40px; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-        .section h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); }
+        .badge { background: #eee; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Panel de Control (Admin)</h1>
+        <header>
+            <h1>Panel de Control (Admin)</h1>
+            <a href="index.html" style="text-decoration: none; color: var(--primary); font-weight: bold;">Ver Web Pública →</a>
+        </header>
 
-        <div class="section">
-            <h2>Solicitudes de Nuevos Comercios</h2>
-            <p>Aquí aparecen quienes enviaron su formulario desde la web principal.</p>
+        <div class="grid">
+            <div class="card">
+                <h2>🎨 Personalización de la Página</h2>
+                <label>URL del Logo (Imagen):</label>
+                <input type="text" id="logo-url" placeholder="https://link-de-tu-logo.png">
+                <label>URL Imagen de Fondo (Header):</label>
+                <input type="text" id="fondo-url" placeholder="https://link-de-tu-fondo.jpg">
+                <button class="btn-edit" id="btn-guardar-estetica">ACTUALIZAR DISEÑO</button>
+            </div>
+
+            <div class="card">
+                <h2>🏷️ Gestión de Rubros</h2>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="nuevo-rubro" placeholder="Ej: Farmacia, Tienda...">
+                    <button class="btn-save" id="btn-add-rubro">AÑADIR</button>
+                </div>
+                <table>
+                    <tbody id="lista-rubros"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📩 Solicitudes de Admisión</h2>
+            <p style="font-size: 0.9rem; color: #666;">Los datos de dirección y contraseña se transfieren automáticamente al dar de alta.</p>
             <table>
                 <thead>
                     <tr>
@@ -41,37 +74,64 @@
                         <th>Acción</th>
                     </tr>
                 </thead>
-                <tbody id="lista-solicitudes">
-                    </tbody>
+                <tbody id="lista-solicitudes"></tbody>
             </table>
         </div>
 
-        <div class="section">
-            <h2>Comercios Activos</h2>
+        <div class="card">
+            <h2>🏢 Comercios Activos</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Rubro</th>
-                        <th>Usuario</th>
+                        <th>Nombre / Rubro</th>
+                        <th>📍 Dirección</th>
+                        <th>📱 WhatsApp</th>
+                        <th>🔑 Usuario</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="lista-comercios">
-                    </tbody>
+                <tbody id="lista-comercios"></tbody>
             </table>
-        </div>
-
-        <div style="margin-top: 20px;">
-            <a href="index.html" style="text-decoration: none; color: var(--primary); font-weight: bold;">← Volver al Inicio</a>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, addDoc, getDocs, doc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, addDoc, getDocs, doc, deleteDoc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. ESCUCHAR SOLICITUDES EN TIEMPO REAL
+        // --- FUNCIONES DE ESTÉTICA ---
+        const btnEstetica = document.getElementById('btn-guardar-estetica');
+        btnEstetica.onclick = async () => {
+            const logo = document.getElementById('logo-url').value;
+            const fondo = document.getElementById('fondo-url').value;
+            await setDoc(doc(db, "configuracion", "apariencia"), { logoUrl: logo, fondoUrl: fondo });
+            alert("¡Diseño actualizado!");
+        };
+
+        async function cargarConfigActual() {
+            const snap = await getDoc(doc(db, "configuracion", "apariencia"));
+            if(snap.exists()){
+                document.getElementById('logo-url').value = snap.data().logoUrl || "";
+                document.getElementById('fondo-url').value = snap.data().fondoUrl || "";
+            }
+        }
+        cargarConfigActual();
+
+        // --- GESTIÓN DE RUBROS ---
+        document.getElementById('btn-add-rubro').onclick = async () => {
+            const r = document.getElementById('nuevo-rubro').value;
+            if(r) { await addDoc(collection(db, "rubros"), { nombre: r }); document.getElementById('nuevo-rubro').value = ""; }
+        };
+
+        onSnapshot(collection(db, "rubros"), (snap) => {
+            const lista = document.getElementById('lista-rubros');
+            lista.innerHTML = "";
+            snap.forEach(d => {
+                lista.innerHTML += `<tr><td>${d.data().nombre}</td><td style="text-align:right"><button class="btn-delete" onclick="eliminarDoc('rubros','${d.id}')">Borrar</button></td></tr>`;
+            });
+        });
+
+        // --- SOLICITUDES Y ALTA AUTOMÁTICA ---
         onSnapshot(collection(db, "solicitudes"), (snap) => {
             const tbody = document.getElementById('lista-solicitudes');
             tbody.innerHTML = "";
@@ -79,48 +139,30 @@
                 const s = d.data();
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${s.nombre}</strong></td>
-                        <td>${s.direccion || 'No especificada'}</td>
+                        <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
+                        <td>${s.direccion || '---'}</td>
                         <td>${s.whatsapp}</td>
-                        <td><small>${s.mensaje || '-'}</small></td>
+                        <td>${s.mensaje || '-'}</td>
                         <td>
-                            <button class="btn-save" onclick="aprobarComercio('${d.id}', '${s.nombre}', '${s.rubro}', '${s.whatsapp}', '${s.pass}', '${s.direccion}')">
-                                DAR DE ALTA
-                            </button>
+                            <button class="btn-save" onclick="aprobarComercio('${d.id}', '${s.nombre}', '${s.rubro}', '${s.whatsapp}', '${s.pass}', '${s.direccion}')">DAR DE ALTA</button>
                             <button class="btn-delete" onclick="eliminarDoc('solicitudes','${d.id}')">X</button>
                         </td>
                     </tr>`;
             });
         });
 
-        // 2. FUNCIÓN PARA DAR DE ALTA AUTOMÁTICAMENTE (Incluye Dirección)
         window.aprobarComercio = async (id, nombre, rubro, whatsapp, pass, direccion) => {
-            // Generamos un usuario sugerido basado en el nombre
-            const usuarioSugerido = nombre.replace(/\s+/g, '_').toLowerCase();
-            
+            const user = nombre.replace(/\s+/g, '_').toLowerCase();
             try {
-                // Guardamos en la colección oficial de comercios
                 await addDoc(collection(db, "comercios"), {
-                    nombre: nombre,
-                    rubro: rubro,
-                    direccion: direccion, // Se carga automáticamente de la solicitud
-                    whatsapp: whatsapp,
-                    password: pass,
-                    usuario: usuarioSugerido,
-                    rol: "comerciante",
-                    fechaAlta: new Date().toLocaleString()
+                    nombre, rubro, whatsapp, password: pass, usuario: user, direccion: direccion, rol: "comerciante"
                 });
-
-                // Borramos la solicitud ya procesada
                 await deleteDoc(doc(db, "solicitudes", id));
-                alert("¡Comercio " + nombre + " dado de alta con éxito!");
-            } catch (e) {
-                console.error(e);
-                alert("Error al procesar el alta.");
-            }
+                alert("Comercio activado.");
+            } catch (e) { alert("Error al activar."); }
         };
 
-        // 3. LISTAR COMERCIOS ACTIVOS
+        // --- LISTADO DE COMERCIOS (DATOS COMPLETOS) ---
         onSnapshot(collection(db, "comercios"), (snap) => {
             const tbody = document.getElementById('lista-comercios');
             tbody.innerHTML = "";
@@ -128,22 +170,16 @@
                 const c = d.data();
                 tbody.innerHTML += `
                     <tr>
-                        <td>${c.nombre}</td>
-                        <td>${c.rubro}</td>
-                        <td><code>${c.usuario}</code></td>
-                        <td>
-                            <button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button>
-                        </td>
+                        <td><strong>${c.nombre}</strong><br><small>${c.rubro}</small></td>
+                        <td>${c.direccion || 'No cargada'}</td>
+                        <td>${c.whatsapp}</td>
+                        <td><span class="badge">${c.usuario}</span></td>
+                        <td><button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button></td>
                     </tr>`;
             });
         });
 
-        // 4. FUNCIÓN GENÉRICA PARA ELIMINAR
-        window.eliminarDoc = async (coleccion, id) => {
-            if(confirm("¿Estás seguro de eliminar este registro?")) {
-                await deleteDoc(doc(db, coleccion, id));
-            }
-        };
+        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, col, id)); };
     </script>
 </body>
 </html>
