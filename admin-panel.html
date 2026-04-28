@@ -1,185 +1,68 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - DÓNDE COMPRO</title>
-    <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --danger: #e74c3c; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1100px; margin: auto; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; margin-bottom: 30px; }
-        h1 { color: var(--primary); margin: 0; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .card h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-left: 5px solid var(--secondary); padding-left: 10px; }
-
-        /* Formularios y Tablas */
-        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; }
-
-        /* Botones */
-        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
-        .btn-save { background: var(--secondary); color: white; padding: 10px 20px; }
-        .btn-delete { background: var(--danger); color: white; padding: 6px 10px; font-size: 0.8rem; }
-        .btn-edit { background: var(--accent); color: white; padding: 10px 20px; margin-top: 5px; }
-        
-        .badge { background: #eee; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <header>
-            <h1>Panel de Control (Admin)</h1>
-            <a href="index.html" style="text-decoration: none; color: var(--primary); font-weight: bold;">Ver Web Pública →</a>
-        </header>
-
-        <div class="grid">
+<div class="grid">
             <div class="card">
                 <h2>🎨 Personalización de la Página</h2>
-                <label>URL del Logo (Imagen):</label>
+                <label>URL del Logo:</label>
                 <input type="text" id="logo-url" placeholder="https://link-de-tu-logo.png">
-                <label>URL Imagen de Fondo (Header):</label>
+                <label>URL Imagen de Fondo:</label>
                 <input type="text" id="fondo-url" placeholder="https://link-de-tu-fondo.jpg">
                 <button class="btn-edit" id="btn-guardar-estetica">ACTUALIZAR DISEÑO</button>
             </div>
 
             <div class="card">
-                <h2>🏷️ Gestión de Rubros</h2>
-                <div style="display: flex; gap: 5px;">
-                    <input type="text" id="nuevo-rubro" placeholder="Ej: Farmacia, Tienda...">
-                    <button class="btn-save" id="btn-add-rubro">AÑADIR</button>
+                <h2>📊 Consulta por Rubro</h2>
+                <p style="font-size: 0.85rem; color: #666;">Selecciona un rubro para ver cuántos comercios hay y listar sus nombres.</p>
+                
+                <select id="filtro-rubro-select">
+                    <option value="">Seleccionar rubro para consultar...</option>
+                </select>
+                
+                <div id="resultado-filtro" style="margin-top: 15px; display: none; padding: 10px; background: #f8f9fa; border-radius: 6px; border: 1px solid #ddd;">
+                    <p id="conteo-rubro" style="font-weight: bold; color: var(--secondary); margin-top: 0;"></p>
+                    <ul id="lista-nombres-filtro" style="margin: 0; padding-left: 20px; font-size: 0.9rem;"></ul>
                 </div>
-                <table>
-                    <tbody id="lista-rubros"></tbody>
-                </table>
             </div>
         </div>
 
-        <div class="card">
-            <h2>📩 Solicitudes de Admisión</h2>
-            <p style="font-size: 0.9rem; color: #666;">Los datos de dirección y contraseña se transfieren automáticamente al dar de alta.</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Comercio</th>
-                        <th>Dirección</th>
-                        <th>WhatsApp</th>
-                        <th>Mensaje</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="lista-solicitudes"></tbody>
-            </table>
-        </div>
-
-        <div class="card">
-            <h2>🏢 Comercios Activos</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre / Rubro</th>
-                        <th>📍 Dirección</th>
-                        <th>📱 WhatsApp</th>
-                        <th>🔑 Usuario</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="lista-comercios"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <script type="module">
+<script type="module">
         import { db } from './firebase-config.js';
-        import { collection, addDoc, getDocs, doc, deleteDoc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, addDoc, getDocs, doc, deleteDoc, onSnapshot, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- FUNCIONES DE ESTÉTICA ---
-        const btnEstetica = document.getElementById('btn-guardar-estetica');
-        btnEstetica.onclick = async () => {
-            const logo = document.getElementById('logo-url').value;
-            const fondo = document.getElementById('fondo-url').value;
-            await setDoc(doc(db, "configuracion", "apariencia"), { logoUrl: logo, fondoUrl: fondo });
-            alert("¡Diseño actualizado!");
-        };
+        // --- LÓGICA DEL NUEVO FILTRO POR RUBRO ---
+        const selectFiltro = document.getElementById('filtro-rubro-select');
+        const contenedorResultado = document.getElementById('resultado-filtro');
+        const textoConteo = document.getElementById('conteo-rubro');
+        const listaNombres = document.getElementById('lista-nombres-filtro');
 
-        async function cargarConfigActual() {
-            const snap = await getDoc(doc(db, "configuracion", "apariencia"));
-            if(snap.exists()){
-                document.getElementById('logo-url').value = snap.data().logoUrl || "";
-                document.getElementById('fondo-url').value = snap.data().fondoUrl || "";
-            }
-        }
-        cargarConfigActual();
-
-        // --- GESTIÓN DE RUBROS ---
-        document.getElementById('btn-add-rubro').onclick = async () => {
-            const r = document.getElementById('nuevo-rubro').value;
-            if(r) { await addDoc(collection(db, "rubros"), { nombre: r }); document.getElementById('nuevo-rubro').value = ""; }
-        };
-
+        // Poblar el select de filtro con los rubros existentes
         onSnapshot(collection(db, "rubros"), (snap) => {
-            const lista = document.getElementById('lista-rubros');
-            lista.innerHTML = "";
+            selectFiltro.innerHTML = '<option value="">Seleccionar rubro para consultar...</option>';
             snap.forEach(d => {
-                lista.innerHTML += `<tr><td>${d.data().nombre}</td><td style="text-align:right"><button class="btn-delete" onclick="eliminarDoc('rubros','${d.id}')">Borrar</button></td></tr>`;
+                selectFiltro.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`;
             });
         });
 
-        // --- SOLICITUDES Y ALTA AUTOMÁTICA ---
-        onSnapshot(collection(db, "solicitudes"), (snap) => {
-            const tbody = document.getElementById('lista-solicitudes');
-            tbody.innerHTML = "";
-            snap.forEach(d => {
-                const s = d.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
-                        <td>${s.direccion || '---'}</td>
-                        <td>${s.whatsapp}</td>
-                        <td>${s.mensaje || '-'}</td>
-                        <td>
-                            <button class="btn-save" onclick="aprobarComercio('${d.id}', '${s.nombre}', '${s.rubro}', '${s.whatsapp}', '${s.pass}', '${s.direccion}')">DAR DE ALTA</button>
-                            <button class="btn-delete" onclick="eliminarDoc('solicitudes','${d.id}')">X</button>
-                        </td>
-                    </tr>`;
-            });
-        });
+        // Actuar a demanda cuando el admin selecciona un rubro
+        selectFiltro.onchange = async () => {
+            const rubroSeleccionado = selectFiltro.value;
+            if (!rubroSeleccionado) {
+                contenedorResultado.style.display = 'none';
+                return;
+            }
 
-        window.aprobarComercio = async (id, nombre, rubro, whatsapp, pass, direccion) => {
-            const user = nombre.replace(/\s+/g, '_').toLowerCase();
-            try {
-                await addDoc(collection(db, "comercios"), {
-                    nombre, rubro, whatsapp, password: pass, usuario: user, direccion: direccion, rol: "comerciante"
-                });
-                await deleteDoc(doc(db, "solicitudes", id));
-                alert("Comercio activado.");
-            } catch (e) { alert("Error al activar."); }
+            const q = query(collection(db, "comercios"), where("rubro", "==", rubroSeleccionado));
+            const snap = await getDocs(q);
+            
+            listaNombres.innerHTML = "";
+            let contador = 0;
+
+            snap.forEach(doc => {
+                contador++;
+                listaNombres.innerHTML += `<li>${doc.data().nombre}</li>`;
+            });
+
+            textoConteo.innerText = `Total en ${rubroSeleccionado}: ${contador} comercio(s)`;
+            contenedorResultado.style.display = 'block';
         };
 
-        // --- LISTADO DE COMERCIOS (DATOS COMPLETOS) ---
-        onSnapshot(collection(db, "comercios"), (snap) => {
-            const tbody = document.getElementById('lista-comercios');
-            tbody.innerHTML = "";
-            snap.forEach(d => {
-                const c = d.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${c.nombre}</strong><br><small>${c.rubro}</small></td>
-                        <td>${c.direccion || 'No cargada'}</td>
-                        <td>${c.whatsapp}</td>
-                        <td><span class="badge">${c.usuario}</span></td>
-                        <td><button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button></td>
-                    </tr>`;
-            });
-        });
-
-        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, col, id)); };
+        // ... (Mantener todas las funciones anteriores: cargarEstetica, gestionar rubros, solicitudes, etc.) ...
     </script>
-</body>
-</html>
