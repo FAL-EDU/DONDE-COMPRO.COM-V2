@@ -1,39 +1,121 @@
-<div class="grid">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - DÓNDE COMPRO</title>
+    <style>
+        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --danger: #e74c3c; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1100px; margin: auto; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; margin-bottom: 30px; }
+        h1 { color: var(--primary); margin: 0; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-left: 5px solid var(--secondary); padding-left: 10px; }
+
+        /* Estilos de Tabla y Listados Detallados */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; }
+        
+        .detalle-filtro { margin-top: 15px; display: none; padding: 15px; background: #fff; border-radius: 8px; border: 1px solid var(--secondary); }
+        .badge { background: #eee; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; }
+
+        /* Botones */
+        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
+        .btn-save { background: var(--secondary); color: white; padding: 10px 20px; }
+        .btn-delete { background: var(--danger); color: white; padding: 6px 10px; font-size: 0.8rem; }
+        .btn-edit { background: var(--accent); color: white; padding: 10px 20px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Panel de Control (Admin)</h1>
+            <a href="index.html" style="text-decoration: none; color: var(--primary); font-weight: bold;">Ver Web Pública →</a>
+        </header>
+
+        <div class="grid">
             <div class="card">
                 <h2>🎨 Personalización de la Página</h2>
                 <label>URL del Logo:</label>
-                <input type="text" id="logo-url" placeholder="https://link-de-tu-logo.png">
+                <input type="text" id="logo-url" placeholder="https://link-de-tu-logo.png" style="width:100%; padding:8px; margin:5px 0;">
                 <label>URL Imagen de Fondo:</label>
-                <input type="text" id="fondo-url" placeholder="https://link-de-tu-fondo.jpg">
+                <input type="text" id="fondo-url" placeholder="https://link-de-tu-fondo.jpg" style="width:100%; padding:8px; margin:5px 0;">
                 <button class="btn-edit" id="btn-guardar-estetica">ACTUALIZAR DISEÑO</button>
             </div>
 
             <div class="card">
                 <h2>📊 Consulta por Rubro</h2>
-                <p style="font-size: 0.85rem; color: #666;">Selecciona un rubro para ver cuántos comercios hay y listar sus nombres.</p>
-                
-                <select id="filtro-rubro-select">
-                    <option value="">Seleccionar rubro para consultar...</option>
+                <p style="font-size: 0.85rem; color: #666;">Selecciona un rubro para ver el conteo y los datos completos de los comercios.</p>
+                <select id="filtro-rubro-select" style="width:100%; padding:10px; border-radius:6px;">
+                    <option value="">Cargando rubros...</option>
                 </select>
                 
-                <div id="resultado-filtro" style="margin-top: 15px; display: none; padding: 10px; background: #f8f9fa; border-radius: 6px; border: 1px solid #ddd;">
-                    <p id="conteo-rubro" style="font-weight: bold; color: var(--secondary); margin-top: 0;"></p>
-                    <ul id="lista-nombres-filtro" style="margin: 0; padding-left: 20px; font-size: 0.9rem;"></ul>
+                <div id="resultado-filtro" class="detalle-filtro">
+                    <p id="conteo-rubro" style="font-weight: bold; color: var(--secondary); margin-bottom: 10px;"></p>
+                    <table id="tabla-detalle-filtro">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Dirección</th>
+                                <th>WhatsApp</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo-detalle-filtro"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-<script type="module">
-        import { db } from './firebase-config.js';
-        import { collection, addDoc, getDocs, doc, deleteDoc, onSnapshot, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        <div class="card">
+            <h2>📩 Solicitudes de Admisión</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Comercio</th>
+                        <th>Dirección</th>
+                        <th>WhatsApp</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-solicitudes"></tbody>
+            </table>
+        </div>
 
-        // --- LÓGICA DEL NUEVO FILTRO POR RUBRO ---
+        <div class="card">
+            <h2>🏢 Comercios Activos (General)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre / Rubro</th>
+                        <th>📍 Dirección</th>
+                        <th>📱 WhatsApp</th>
+                        <th>🔑 Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-comercios"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { collection, getDocs, doc, deleteDoc, onSnapshot, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- LÓGICA DE FILTRO DETALLADO ---
         const selectFiltro = document.getElementById('filtro-rubro-select');
         const contenedorResultado = document.getElementById('resultado-filtro');
         const textoConteo = document.getElementById('conteo-rubro');
-        const listaNombres = document.getElementById('lista-nombres-filtro');
+        const tablaCuerpo = document.getElementById('cuerpo-detalle-filtro');
 
-        // Poblar el select de filtro con los rubros existentes
+        // Poblar rubros
         onSnapshot(collection(db, "rubros"), (snap) => {
             selectFiltro.innerHTML = '<option value="">Seleccionar rubro para consultar...</option>';
             snap.forEach(d => {
@@ -41,28 +123,79 @@
             });
         });
 
-        // Actuar a demanda cuando el admin selecciona un rubro
+        // Consulta a demanda con datos completos
         selectFiltro.onchange = async () => {
-            const rubroSeleccionado = selectFiltro.value;
-            if (!rubroSeleccionado) {
-                contenedorResultado.style.display = 'none';
-                return;
-            }
+            const rubro = selectFiltro.value;
+            if(!rubro) { contenedorResultado.style.display = 'none'; return; }
 
-            const q = query(collection(db, "comercios"), where("rubro", "==", rubroSeleccionado));
+            const q = query(collection(db, "comercios"), where("rubro", "==", rubro));
             const snap = await getDocs(q);
             
-            listaNombres.innerHTML = "";
-            let contador = 0;
+            tablaCuerpo.innerHTML = "";
+            let count = 0;
 
             snap.forEach(doc => {
-                contador++;
-                listaNombres.innerHTML += `<li>${doc.data().nombre}</li>`;
+                count++;
+                const c = doc.data();
+                tablaCuerpo.innerHTML += `
+                    <tr>
+                        <td><strong>${c.nombre}</strong></td>
+                        <td><small>${c.direccion || 'No cargada'}</small></td>
+                        <td>${c.whatsapp}</td>
+                        <td><span class="badge">${c.usuario}</span></td>
+                    </tr>`;
             });
 
-            textoConteo.innerText = `Total en ${rubroSeleccionado}: ${contador} comercio(s)`;
+            textoConteo.innerText = `Total en ${rubro}: ${count} comercio(s)`;
             contenedorResultado.style.display = 'block';
         };
 
-        // ... (Mantener todas las funciones anteriores: cargarEstetica, gestionar rubros, solicitudes, etc.) ...
+        // --- (Mantener el resto de funciones: cargar solicitudes, dar de alta y eliminar) ---
+        onSnapshot(collection(db, "solicitudes"), (snap) => {
+            const tbody = document.getElementById('lista-solicitudes');
+            tbody.innerHTML = "";
+            snap.forEach(d => {
+                const s = d.data();
+                tbody.innerHTML += `<tr>
+                    <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
+                    <td>${s.direccion || '---'}</td>
+                    <td>${s.whatsapp}</td>
+                    <td><button class="btn-save" onclick="aprobarComercio('${d.id}','${s.nombre}','${s.rubro}','${s.whatsapp}','${s.pass}','${s.direccion}')">DAR DE ALTA</button></td>
+                </tr>`;
+            });
+        });
+
+        onSnapshot(collection(db, "comercios"), (snap) => {
+            const tbody = document.getElementById('lista-comercios');
+            tbody.innerHTML = "";
+            snap.forEach(d => {
+                const c = d.data();
+                tbody.innerHTML += `<tr>
+                    <td><strong>${c.nombre}</strong><br><small>${c.rubro}</small></td>
+                    <td>${c.direccion}</td>
+                    <td>${c.whatsapp}</td>
+                    <td><span class="badge">${c.usuario}</span></td>
+                    <td><button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button></td>
+                </tr>`;
+            });
+        });
+
+        window.aprobarComercio = async (id, n, r, w, p, d) => {
+            const u = n.replace(/\s+/g, '_').toLowerCase();
+            await addDoc(collection(db, "comercios"), { nombre:n, rubro:r, whatsapp:w, password:p, usuario:u, direccion:d, rol:"comerciante" });
+            await deleteDoc(doc(db, "solicitudes", id));
+            alert("Comercio activado");
+        };
+
+        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, col, id)); };
+
+        // Guardar Estética
+        document.getElementById('btn-guardar-estetica').onclick = async () => {
+            const logo = document.getElementById('logo-url').value;
+            const fondo = document.getElementById('fondo-url').value;
+            await setDoc(doc(db, "configuracion", "apariencia"), { logoUrl: logo, fondoUrl: fondo });
+            alert("Diseño actualizado");
+        };
     </script>
+</body>
+</html>
