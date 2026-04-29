@@ -6,33 +6,30 @@
     <title>DÓNDE COMPRO - Localización de productos cercanos</title>
     <style>
         :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--light); color: #333; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--light); color: #333; overflow-x: hidden; }
         
-        /* BOTÓN RECUPERADO: ACCESO USUARIOS (Admin y Comerciantes) */
+        /* BOTÓN DE ACCESO USUARIOS (Protegido) */
         .admin-access {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: 20px;
             z-index: 100;
         }
         .btn-usuarios {
             background: rgba(255, 255, 255, 0.15);
             color: white;
-            padding: 10px 18px;
+            padding: 10px 20px;
             border-radius: 8px;
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: bold;
             border: 1px solid rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(5px);
             transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .btn-usuarios:hover { background: white; color: var(--primary); }
 
-        /* Header con soporte para Logo y Fondo dinámico */
+        /* Header Dinámico */
         header { 
             background: var(--primary); 
             color: white; 
@@ -42,9 +39,9 @@
             background-position: center;
             position: relative;
         }
-        .logo-img { max-width: 110px; margin-bottom: 10px; border-radius: 12px; }
+        .logo-img { max-width: 110px; margin-bottom: 15px; border-radius: 12px; }
         
-        /* Buscador Flotante */
+        /* Buscador Principal */
         .search-container {
             max-width: 750px;
             margin: -35px auto 20px;
@@ -58,12 +55,12 @@
         .search-container input { flex: 1; padding: 16px; border: 1px solid #eee; border-radius: 10px; outline: none; font-size: 1rem; }
         .btn-buscar { background: var(--secondary); color: white; border: none; padding: 0 30px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* MODAL RESPONSIVO (No se sale de la pantalla) */
+        /* MODAL OPTIMIZADO PARA MÓVILES */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 2000;
             align-items: center;
             justify-content: center;
@@ -76,64 +73,53 @@
             width: 100%;
             max-width: 420px;
             position: relative;
-            max-height: 95vh; /* Evita que se oculte el final */
-            overflow-y: auto; /* Permite scroll interno */
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-height: 90vh; /* No se sale de la pantalla */
+            overflow-y: auto; /* Scroll interno si es necesario */
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
         }
-        .close { position: sticky; top: 0; float: right; font-size: 30px; cursor: pointer; color: #bbb; margin-top: -15px; }
+        .close { position: sticky; top: 0; float: right; font-size: 32px; cursor: pointer; color: #999; margin-top: -10px; }
         
-        .modal-content h2 { margin: 0 0 5px; color: var(--primary); }
+        .modal-content h2 { margin: 0 0 10px; color: var(--primary); }
         .modal-content input, .modal-content select {
-            width: 100%;
-            padding: 13px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-sizing: border-box;
+            width: 100%; padding: 14px; margin: 8px 0;
+            border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;
         }
         
-        /* Bloque de Credenciales para que impacte el "Usuario" */
+        /* Caja de Credenciales de Usuario */
         .credenciales-box {
             background: #f1f8f4;
-            padding: 15px;
+            padding: 20px;
             border-radius: 12px;
-            margin: 12px 0;
-            border: 1px solid var(--secondary);
+            margin: 15px 0;
+            border: 2px dashed var(--secondary);
         }
-        .credenciales-box label { font-size: 0.75rem; color: var(--secondary); font-weight: bold; display: block; margin-bottom: 5px; }
+        .credenciales-box label { font-size: 0.75rem; color: var(--secondary); font-weight: 800; display: block; margin-bottom: 5px; }
         
         .btn-enviar {
-            width: 100%;
-            padding: 16px;
-            background: var(--secondary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin-top: 10px;
+            width: 100%; padding: 16px; background: var(--secondary); color: white;
+            border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
 
-        .btn-registro-trigger {
+        .btn-registro-main {
             display: inline-block;
             background: var(--accent);
             color: white;
-            padding: 18px 40px;
+            padding: 18px 35px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: bold;
+            margin: 40px auto;
             box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
-            margin: 40px 0;
             transition: 0.3s;
         }
+        .btn-registro-main:hover { transform: translateY(-3px); }
     </style>
 </head>
 <body>
 
     <header id="main-header">
         <div class="admin-access">
-            <a href="admin-panel.html" class="btn-usuarios">👤 ACCESO USUARIOS</a>
+            <a href="login.html" class="btn-usuarios">👤 ACCESO USUARIOS</a>
         </div>
 
         <img src="" id="main-logo" class="logo-img" alt="Logo" style="display:none;">
@@ -142,12 +128,12 @@
     </header>
 
     <div class="search-container">
-        <input type="text" id="input-busqueda" placeholder="¿Qué buscas hoy?">
+        <input type="text" id="input-busqueda" placeholder="¿Qué buscas? (ej: Farmacia, Pizza...)">
         <button class="btn-buscar">BUSCAR</button>
     </div>
 
     <div style="text-align: center;">
-        <a href="javascript:void(0)" class="btn-registro-trigger" onclick="abrirModal()">
+        <a href="javascript:void(0)" class="btn-registro-main" onclick="abrirModal()">
             📢 REGISTRA TU COMERCIO AQUÍ
         </a>
     </div>
@@ -156,22 +142,22 @@
         <div class="modal-content">
             <span class="close" onclick="cerrarModal()">&times;</span>
             <h2>Solicitud de Admisión</h2>
-            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Crea tu espacio en nuestra red.</p>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">Completa tus datos para unirte.</p>
             
-            <input type="text" id="reg-nombre" placeholder="Nombre del Comercio">
+            <input type="text" id="reg-nombre" placeholder="Nombre de la Tienda">
             
             <select id="reg-rubro">
                 <option value="">Selecciona tu Rubro...</option>
-                </select>
+            </select>
 
             <input type="text" id="reg-direccion" placeholder="Dirección del Local">
             
             <input type="text" id="reg-whatsapp" placeholder="WhatsApp (ej: 3876...)">
 
             <div class="credenciales-box">
-                <label>🔐 DATOS DE ACCESO:</label>
-                <input type="text" id="reg-usuario" placeholder="Elige tu nombre de Usuario">
-                <input type="password" id="reg-pass" placeholder="Crea tu Contraseña">
+                <label>🔐 CREA TU CUENTA DE ACCESO:</label>
+                <input type="text" id="reg-usuario" placeholder="Nombre de Usuario deseado">
+                <input type="password" id="reg-pass" placeholder="Contraseña de acceso">
             </div>
 
             <button class="btn-enviar" id="btn-enviar-solicitud">ENVIAR SOLICITUD</button>
@@ -182,11 +168,11 @@
         import { db } from './firebase-config.js';
         import { collection, addDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Cargar Logo y Fondo del Admin
-        async function loadUI() {
-            const config = await getDoc(doc(db, "configuracion", "apariencia"));
-            if(config.exists()) {
-                const { logoUrl, fondoUrl } = config.data();
+        // 1. Cargar diseño desde Admin
+        async function loadAppearance() {
+            const snap = await getDoc(doc(db, "configuracion", "apariencia"));
+            if(snap.exists()) {
+                const { logoUrl, fondoUrl } = snap.data();
                 if(logoUrl) { 
                     const img = document.getElementById('main-logo');
                     img.src = logoUrl; img.style.display = 'inline-block';
@@ -197,43 +183,39 @@
                 }
             }
         }
-        loadUI();
+        loadAppearance();
 
-        // Cargar Rubros
+        // 2. Cargar Rubros dinámicamente
         onSnapshot(collection(db, "rubros"), (snap) => {
             const select = document.getElementById('reg-rubro');
             select.innerHTML = '<option value="">Selecciona tu Rubro...</option>';
-            snap.forEach(d => {
-                select.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`;
-            });
+            snap.forEach(d => select.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`);
         });
 
-        // Envío de Solicitud (Capturando el Usuario)
+        // 3. Enviar solicitud con Usuario y Pass
         document.getElementById('btn-enviar-solicitud').onclick = async () => {
             const nombre = document.getElementById('reg-nombre').value;
-            const rubro = document.getElementById('reg-rubro').value;
             const usuario_elegido = document.getElementById('reg-usuario').value;
             const pass = document.getElementById('reg-pass').value;
 
             if(!nombre || !usuario_elegido || !pass) {
-                alert("Completa los campos obligatorios para el registro.");
+                alert("Por favor, elige un Usuario y Contraseña para tu cuenta.");
                 return;
             }
 
             try {
                 await addDoc(collection(db, "solicitudes"), {
-                    nombre, rubro, 
+                    nombre,
+                    rubro: document.getElementById('reg-rubro').value,
                     direccion: document.getElementById('reg-direccion').value,
                     whatsapp: document.getElementById('reg-whatsapp').value,
-                    usuario_elegido, // Dato que llega al admin
+                    usuario_elegido, // Importante: ya no llegará undefined al admin
                     pass,
                     fecha: new Date().toLocaleString()
                 });
-                alert("¡Solicitud enviada con éxito!");
+                alert("¡Solicitud enviada correctamente!");
                 cerrarModal();
-            } catch (e) {
-                alert("Error al procesar. Revisa tu conexión.");
-            }
+            } catch (e) { alert("Error al conectar con el servidor."); }
         };
 
         window.abrirModal = () => document.getElementById('modal-registro').style.display = 'flex';
