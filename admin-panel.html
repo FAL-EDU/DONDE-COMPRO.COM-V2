@@ -11,221 +11,171 @@
         
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; margin-bottom: 30px; }
         h1 { color: var(--primary); margin: 0; font-size: 1.8rem; }
+        .btn-logout { background: #7f8c8d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
 
         .grid { display: grid; grid-template-columns: 320px 1fr; gap: 25px; align-items: start; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 25px; position: relative; }
-        .card h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-left: 5px solid var(--secondary); padding-left: 12px; display: flex; align-items: center; gap: 10px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 25px; }
+        h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; border-left: 5px solid var(--secondary); padding-left: 10px; }
 
-        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
-        th { background: #fafafa; color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f8f9fa; text-align: left; padding: 12px; border-bottom: 2px solid #eee; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
         
-        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.3s; }
-        .btn-save { background: var(--secondary); color: white; padding: 10px 15px; }
-        .btn-delete { background: var(--danger); color: white; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
-        .btn-edit { background: var(--accent); color: white; width: 100%; padding: 12px; margin-top: 10px; text-transform: uppercase; }
-        
-        .badge { background: #f0f0f0; padding: 4px 8px; border-radius: 5px; font-family: monospace; color: #555; }
-        .scroll-box { max-height: 200px; overflow-y: auto; margin-top: 10px; border: 1px solid #eee; border-radius: 8px; }
+        .btn-approve { background: var(--secondary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .badge { background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+
+        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-save { background: var(--primary); color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h1>Panel de Control (Admin)</h1>
-            <a href="index.html" style="text-decoration: none; color: var(--primary); font-size: 0.9rem;">Ver Web Pública →</a>
+            <h1>🛡️ Panel de Administración</h1>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
         </header>
 
         <div class="grid">
-            <div class="col-side">
+            <aside>
                 <div class="card">
-                    <h2>🎨 Personalización</h2>
-                    <label style="font-size: 0.8rem; color: #666;">URL del Logo:</label>
+                    <h2>Estética del Sitio</h2>
+                    <label>URL Logo:</label>
                     <input type="text" id="logo-url" placeholder="https://...">
-                    <label style="font-size: 0.8rem; color: #666;">URL Imagen de Fondo:</label>
+                    <label>URL Fondo:</label>
                     <input type="text" id="fondo-url" placeholder="https://...">
-                    <button class="btn-edit" id="btn-guardar-estetica">ACTUALIZAR DISEÑO</button>
+                    <button class="btn-save" id="btn-guardar-estetica">Guardar Apariencia</button>
+                </div>
+            </aside>
+
+            <main>
+                <div class="card">
+                    <h2>Nuevas Solicitudes</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Comercio</th>
+                                <th>WhatsApp</th>
+                                <th>Usuario / Pass</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-solicitudes">
+                            </tbody>
+                    </table>
                 </div>
 
                 <div class="card">
-                    <h2>🏷️ Gestionar Rubros</h2>
-                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                        <input type="text" id="nuevo-rubro" placeholder="Nuevo rubro..." style="margin:0;">
-                        <button class="btn-save" id="btn-add-rubro" style="padding: 5px 15px;">+</button>
-                    </div>
-                    <div class="scroll-box">
-                        <table>
-                            <tbody id="lista-rubros"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-main">
-                <div class="card">
-                    <h2>📊 Consulta por Rubro</h2>
-                    <select id="filtro-rubro-select">
-                        <option value="">Selecciona un rubro para consultar...</option>
-                    </select>
-                    <div id="resultado-filtro" style="display:none; margin-top: 20px; padding: 15px; border: 1px solid var(--secondary); border-radius: 10px;">
-                        <p id="conteo-rubro" style="font-weight: bold; color: var(--secondary); margin-top: 0;"></p>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Dirección</th>
-                                    <th>WhatsApp</th>
-                                    <th>Usuario</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpo-detalle-filtro"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>📩 Solicitudes de Admisión</h2>
+                    <h2>Comercios Activados</h2>
                     <table>
                         <thead>
                             <tr>
                                 <th>Comercio</th>
                                 <th>Dirección</th>
-                                <th>WhatsApp</th>
-                                <th>🔑 Usuario Solicitado</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-solicitudes"></tbody>
-                    </table>
-                </div>
-
-                <div class="card">
-                    <h2>🏢 Comercios Activos</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre / Rubro</th>
-                                <th>📍 Dirección</th>
-                                <th>📱 WhatsApp</th>
-                                <th>🔑 Usuario</th>
+                                <th>Usuario</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="lista-comercios"></tbody>
+                        <tbody id="lista-comercios">
+                            </tbody>
                     </table>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, addDoc, getDocs, doc, deleteDoc, onSnapshot, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { 
+            collection, onSnapshot, doc, addDoc, deleteDoc, setDoc, query, where 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // GESTIÓN DE RUBROS
-        document.getElementById('btn-add-rubro').onclick = async () => {
-            const rubro = document.getElementById('nuevo-rubro').value.trim().toUpperCase();
-            if(rubro) {
-                await addDoc(collection(db, "rubros"), { nombre: rubro });
-                document.getElementById('nuevo-rubro').value = "";
-            }
-        };
+        // 1. SEGURIDAD: Solo admin puede estar aquí
+        if (localStorage.getItem("sesion") !== "admin") {
+            window.location.href = "login.html";
+        }
 
-        onSnapshot(collection(db, "rubros"), (snap) => {
-            const lista = document.getElementById('lista-rubros');
-            const selectFiltro = document.getElementById('filtro-rubro-select');
-            lista.innerHTML = "";
-            selectFiltro.innerHTML = '<option value="">Selecciona un rubro para consultar...</option>';
-            snap.forEach(d => {
-                const nombre = d.data().nombre;
-                lista.innerHTML += `<tr><td>${nombre}</td><td style="text-align:right"><button class="btn-delete" onclick="eliminarDoc('rubros','${d.id}')" style="padding:2px 8px;">×</button></td></tr>`;
-                selectFiltro.innerHTML += `<option value="${nombre}">${nombre}</option>`;
-            });
-        });
-
-        // FILTRO DETALLADO
-        document.getElementById('filtro-rubro-select').onchange = async (e) => {
-            const rubro = e.target.value;
-            const res = document.getElementById('resultado-filtro');
-            if(!rubro) { res.style.display = 'none'; return; }
-            const q = query(collection(db, "comercios"), where("rubro", "==", rubro));
-            const snap = await getDocs(q);
-            const cuerpo = document.getElementById('cuerpo-detalle-filtro');
-            cuerpo.innerHTML = "";
-            let count = 0;
-            snap.forEach(d => {
-                count++;
-                const c = d.data();
-                cuerpo.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td><small>${c.direccion || '-'}</small></td><td>${c.whatsapp}</td><td><span class="badge">${c.usuario}</span></td></tr>`;
-            });
-            document.getElementById('conteo-rubro').innerText = `Total en ${rubro}: ${count} comercio(s)`;
-            res.style.display = 'block';
-        };
-
-        // SOLICITUDES - Sincronizado con la nueva función de aprobación
+        // 2. LISTAR SOLICITUDES PENDIENTES
         onSnapshot(collection(db, "solicitudes"), (snap) => {
             const tbody = document.getElementById('lista-solicitudes');
             tbody.innerHTML = "";
             snap.forEach(d => {
                 const s = d.data();
-                tbody.innerHTML += `<tr>
-                    <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
-                    <td>${s.direccion || '---'}</td>
-                    <td>${s.whatsapp}</td>
-                    <td><span class="badge">${s.usuario_elegido || 'No definido'}</span></td>
-                    <td><button class="btn-save" onclick="aprobarComercio('${d.id}','${s.nombre}','${s.rubro}','${s.whatsapp}','${s.pass}','${s.direccion}','${s.usuario_elegido}')">DAR DE ALTA</button></td>
-                </tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
+                        <td>${s.whatsapp}</td>
+                        <td><small>U: ${s.usuario}<br>P: ${s.pass}</small></td>
+                        <td>
+                            <button class="btn-approve" onclick="aprobarComercio('${d.id}','${s.nombre}','${s.rubro}','${s.whatsapp}','${s.pass}','${s.direccion}','${s.usuario}')">Aprobar</button>
+                        </td>
+                    </tr>`;
             });
         });
 
-        // FUNCIÓN APROBAR CORREGIDA E INTEGRADA
+        // 3. FUNCIÓN PARA APROBAR (Mueve de 'solicitudes' a 'comercios')
         window.aprobarComercio = async (id, n, r, w, p, d, u) => {
             try {
-                // Guardamos con los campos exactos que espera login.html ('pass' y 'usuario')
-                await addDoc(collection(db, "comercios"), { 
-                    nombre: n, 
-                    rubro: r, 
-                    whatsapp: w, 
-                    pass: p,            // Contraseña elegida por el comerciante
-                    usuario: u,         // Usuario elegido por el comerciante
-                    direccion: d, 
-                    rol: "comerciante", // Define que NO es un administrador
-                    tipo: "comercio"
+                // Guardamos en la colección definitiva con los campos sincronizados
+                await addDoc(collection(db, "comercios"), {
+                    nombre: n,
+                    rubro: r,
+                    whatsapp: w,
+                    pass: p,       // Campo clave para el login
+                    usuario: u,    // Campo clave para el login
+                    direccion: d,
+                    rol: "comerciante"
                 });
-                // Borramos la solicitud una vez aprobada
+                // Borramos la solicitud pendiente
                 await deleteDoc(doc(db, "solicitudes", id));
-                alert("Comercio activado con éxito. El usuario '" + u + "' ya puede acceder a comerciante.html");
+                alert("¡Comercio activado con éxito!");
             } catch (error) {
-                console.error("Error al aprobar:", error);
-                alert("Error en el proceso de alta.");
+                console.error(error);
+                alert("Error al aprobar el comercio.");
             }
         };
 
-        // COMERCIOS ACTIVOS
+        // 4. LISTAR COMERCIOS ACTIVOS
         onSnapshot(collection(db, "comercios"), (snap) => {
             const tbody = document.getElementById('lista-comercios');
             tbody.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
-                tbody.innerHTML += `<tr>
-                    <td><strong>${c.nombre}</strong><br><small>${c.rubro}</small></td>
-                    <td>${c.direccion}</td>
-                    <td>${c.whatsapp}</td>
-                    <td><span class="badge">${c.usuario}</span></td>
-                    <td><button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button></td>
-                </tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${c.nombre}</strong></td>
+                        <td>${c.direccion}</td>
+                        <td><span class="badge">${c.usuario}</span></td>
+                        <td>
+                            <button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button>
+                        </td>
+                    </tr>`;
             });
         });
 
-        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, col, id)); };
+        // 5. ELIMINAR DOCUMENTOS
+        window.eliminarDoc = async (col, id) => {
+            if (confirm("¿Estás seguro de eliminar este registro?")) {
+                await deleteDoc(doc(db, col, id));
+            }
+        };
 
+        // 6. GUARDAR ESTÉTICA
         document.getElementById('btn-guardar-estetica').onclick = async () => {
             const logo = document.getElementById('logo-url').value;
             const fondo = document.getElementById('fondo-url').value;
-            await setDoc(doc(db, "configuracion", "apariencia"), { logoUrl: logo, fondoUrl: fondo });
-            alert("Diseño actualizado");
+            await setDoc(doc(db, "configuracion", "apariencia"), { 
+                logoUrl: logo, 
+                fondoUrl: fondo 
+            });
+            alert("Apariencia actualizada en la base de datos.");
+        };
+
+        // 7. CERRAR SESIÓN
+        window.cerrarSesion = () => {
+            localStorage.clear();
+            window.location.href = "login.html";
         };
     </script>
 </body>
