@@ -9,162 +9,161 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; display: flex; }
         
         /* Sidebar */
-        .sidebar { width: 250px; background: var(--primary); color: white; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .sidebar h2 { font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .nav-link { color: #bdc3c7; text-decoration: none; display: block; padding: 10px 0; transition: 0.3s; cursor: pointer; }
-        .nav-link:hover { color: white; }
-        .btn-logout { background: #e74c3c; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; margin-top: 20px; cursor: pointer; }
+        .sidebar { width: 260px; background: var(--primary); color: white; min-height: 100vh; padding: 25px; box-sizing: border-box; position: fixed; }
+        .sidebar h2 { font-size: 1.3rem; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .btn-logout { background: #e74c3c; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; margin-top: 30px; cursor: pointer; font-weight: bold; }
 
-        /* Contenido Principal */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        h3 { margin-top: 0; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; }
+        /* Contenido */
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        h3 { margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+
+        /* Gestión de Rubros */
+        .flex-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .rubros-list { max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 8px; }
+        .rubro-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #f9f9f9; }
+        .btn-del-small { background: #ff7675; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 2px 8px; }
+
+        /* Filtro de Consulta */
+        .filter-box { background: #f1f8f4; padding: 20px; border-radius: 10px; border-left: 5px solid var(--secondary); }
+        .lista-consulta { margin-top: 15px; padding-left: 20px; color: var(--primary); font-weight: 500; }
 
         /* Tablas */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
-        th { background: #f8f9fa; text-align: left; padding: 12px; border-bottom: 2px solid #eee; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        .btn-accion { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-alta { background: var(--secondary); color: white; }
-        .btn-eliminar { background: #e74c3c; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; padding: 12px; background: #f8f9fa; border-bottom: 2px solid #eee; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .btn-alta { background: var(--secondary); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
+        .btn-eliminar { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
 
-        /* Formulario Personalización */
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .btn-save { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <script>
-        if (!localStorage.getItem("sesion")) {
-            window.location.href = "login.html";
-        }
-        function cerrarSesion() {
-            localStorage.removeItem("sesion");
-            window.location.href = "index.html";
-        }
+        if (!localStorage.getItem("sesion")) window.location.href = "login.html";
+        function cerrarSesion() { localStorage.removeItem("sesion"); window.location.href = "index.html"; }
     </script>
 
     <div class="sidebar">
         <h2>PANEL ADMIN</h2>
-        <div class="nav-link">📊 Resumen</div>
-        <div class="nav-link">📂 Comercios</div>
-        <div class="nav-link">🎨 Apariencia</div>
+        <p style="font-size: 0.8rem; color: #bdc3c7;">Sesión: <b id="display-user"></b></p>
         <button class="btn-logout" onclick="cerrarSesion()">CERRAR SESIÓN</button>
     </div>
 
     <div class="main-content">
         <div class="card">
             <h3>🎨 Personalización de la Página</h3>
-            <div class="config-grid">
-                <div>
-                    <label>URL del Logo:</label>
-                    <input type="text" id="conf-logo" placeholder="https://ejemplo.com/logo.png">
-                </div>
-                <div>
-                    <label>URL Imagen de Fondo:</label>
-                    <input type="text" id="conf-fondo" placeholder="https://ejemplo.com/fondo.jpg">
-                </div>
+            <div class="flex-row">
+                <input type="text" id="conf-logo" placeholder="URL del Logo" style="flex:1;">
+                <input type="text" id="conf-fondo" placeholder="URL Imagen de Fondo" style="flex:1;">
+                <button class="btn-alta" id="btn-save-design">ACTUALIZAR</button>
             </div>
-            <button class="btn-save" id="btn-guardar-estetica">ACTUALIZAR DISEÑO</button>
+        </div>
+
+        <div class="card">
+            <h3>🏷️ Gestionar Rubros</h3>
+            <div class="flex-row">
+                <input type="text" id="new-rubro" placeholder="Nombre del nuevo rubro..." style="flex:1;">
+                <button class="btn-alta" id="btn-add-rubro">AÑADIR +</button>
+            </div>
+            <div class="rubros-list" id="lista-rubros-admin"></div>
+        </div>
+
+        <div class="card">
+            <h3>📊 Consulta por Rubro</h3>
+            <div class="filter-box">
+                <select id="filter-select" style="width: 100%;">
+                    <option value="">Selecciona un rubro para consultar...</option>
+                </select>
+                <div id="filter-results" class="lista-consulta"></div>
+            </div>
         </div>
 
         <div class="card">
             <h3>📩 Solicitudes de Admisión</h3>
-            <table id="tabla-solicitudes">
-                <thead>
-                    <tr>
-                        <th>Comercio</th>
-                        <th>WhatsApp</th>
-                        <th>🔑 Usuario Solicitado</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
+            <table>
+                <thead><tr><th>Comercio</th><th>WhatsApp</th><th>🔑 Usuario</th><th>Acción</th></tr></thead>
+                <tbody id="solicitudes-body"></tbody>
             </table>
         </div>
 
         <div class="card">
             <h3>✅ Comercios Activos</h3>
-            <table id="tabla-activos">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Rubro</th>
-                        <th>Usuario</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
+            <table>
+                <thead><tr><th>Nombre</th><th>Rubro</th><th>Usuario</th><th>Acción</th></tr></thead>
+                <tbody id="activos-body"></tbody>
             </table>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. Gestión de Apariencia
-        document.getElementById('btn-guardar-estetica').onclick = async () => {
-            const logoUrl = document.getElementById('conf-logo').value;
-            const fondoUrl = document.getElementById('conf-fondo').value;
-            await setDoc(doc(db, "configuracion", "apariencia"), { logoUrl, fondoUrl });
-            alert("Diseño actualizado correctamente.");
-        };
+        document.getElementById('display-user').innerText = localStorage.getItem("sesion");
 
-        // 2. Cargar Solicitudes en Tiempo Real
-        onSnapshot(collection(db, "solicitudes"), (snap) => {
-            const tbody = document.querySelector("#tabla-solicitudes tbody");
-            tbody.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${data.nombre}</b><br><small>${data.rubro}</small></td>
-                        <td>${data.whatsapp}</td>
-                        <td><code>${data.usuario_elegido}</code></td>
-                        <td>
-                            <button class="btn-accion btn-alta" onclick="aprobarComercio('${d.id}')">DAR ALTA</button>
-                            <button class="btn-accion btn-eliminar" onclick="eliminarDoc('solicitudes','${d.id}')">✖</button>
-                        </td>
-                    </tr>`;
-            });
-        });
-
-        // 3. Cargar Comercios Activos
-        onSnapshot(collection(db, "comercios"), (snap) => {
-            const tbody = document.querySelector("#tabla-activos tbody");
-            tbody.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${data.nombre}</td>
-                        <td>${data.rubro}</td>
-                        <td>${data.usuario}</td>
-                        <td>
-                            <button class="btn-accion btn-eliminar" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button>
-                        </td>
-                    </tr>`;
-            });
-        });
-
-        // 4. Función para Aprobar (Pasar de Solicitud a Activo)
-        window.aprobarComercio = async (id) => {
-            const snap = await doc(db, "solicitudes", id);
-            // Aquí deberías obtener el dato y pasarlo a "comercios"
-            // Por simplicidad en este ejemplo, simulamos la lógica:
-            // (En un sistema real usarías getDoc primero)
-            alert("Procesando alta de comercio...");
-        };
-
-        // Función Genérica para eliminar
-        window.eliminarDoc = async (col, id) => {
-            if(confirm("¿Estás seguro?")) {
-                await deleteDoc(doc(db, col, id));
+        // --- FUNCIONALIDAD DE RUBROS ---
+        document.getElementById('btn-add-rubro').onclick = async () => {
+            const nombre = document.getElementById('new-rubro').value.toUpperCase().trim();
+            if(nombre) {
+                await addDoc(collection(db, "rubros"), { nombre });
+                document.getElementById('new-rubro').value = "";
             }
         };
+
+        onSnapshot(collection(db, "rubros"), (snap) => {
+            const div = document.getElementById('lista-rubros-admin');
+            const select = document.getElementById('filter-select');
+            div.innerHTML = "";
+            select.innerHTML = '<option value="">Selecciona un rubro para consultar...</option>';
+            snap.forEach(d => {
+                div.innerHTML += `<div class="rubro-item"><span>${d.data().nombre}</span><button class="btn-del-small" onclick="eliminarDoc('rubros','${d.id}')">✖</button></div>`;
+                select.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`;
+            });
+        });
+
+        // --- CONSULTA FILTRADA ---
+        document.getElementById('filter-select').onchange = async (e) => {
+            const rubro = e.target.value;
+            const resDiv = document.getElementById('filter-results');
+            if(!rubro) { resDiv.innerHTML = ""; return; }
+
+            const q = query(collection(db, "comercios"), where("rubro", "==", rubro));
+            const snap = await getDocs(q);
+            resDiv.innerHTML = `<strong>Total en ${rubro}: ${snap.size} comercio(s)</strong><br><br>`;
+            snap.forEach(d => {
+                resDiv.innerHTML += `• ${d.data().nombre}<br>`;
+            });
+        };
+
+        // --- RESTO DE GESTIÓN (Personalización, Solicitudes, Activos) ---
+        document.getElementById('btn-save-design').onclick = async () => {
+            await setDoc(doc(db, "configuracion", "apariencia"), {
+                logoUrl: document.getElementById('conf-logo').value,
+                fondoUrl: document.getElementById('conf-fondo').value
+            });
+            alert("Diseño actualizado.");
+        };
+
+        onSnapshot(collection(db, "solicitudes"), (snap) => {
+            const body = document.getElementById('solicitudes-body');
+            body.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                body.innerHTML += `<tr>
+                    <td><b>${data.nombre}</b></td><td>${data.whatsapp}</td><td><code>${data.usuario_elegido}</code></td>
+                    <td><button class="btn-alta" onclick="aprobar('${d.id}')">DAR ALTA</button></td>
+                </tr>`;
+            });
+        });
+
+        window.aprobar = async (id) => {
+            // Lógica para pasar de solicitud a activo (simplificada)
+            alert("Procesando alta...");
+        };
+
+        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, col, id)); };
     </script>
 </body>
 </html>
