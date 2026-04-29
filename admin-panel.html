@@ -182,24 +182,28 @@
         });
 
         // FUNCIÓN APROBAR - CORREGIDA: Sincroniza nombres de campos con el login ('pass' y 'usuario')
-        window.aprobarComercio = async (id, nombre, rubro, whatsapp, pass, direccion, usuario) => {
-            try {
-                await addDoc(collection(db, "comercios"), { 
-                    nombre: nombre, 
-                    rubro: rubro, 
-                    whatsapp: whatsapp, 
-                    pass: pass,      // Cambio crítico: se usa 'pass' para que el login lo encuentre
-                    usuario: usuario, // Se usa el usuario elegido correctamente
-                    direccion: direccion, 
-                    rol: "comerciante" 
-                });
-                await deleteDoc(doc(db, "solicitudes", id));
-                alert("Comercio activado con éxito para el usuario: " + usuario);
-            } catch (error) {
-                console.error("Error al aprobar:", error);
-                alert("Error al procesar el alta.");
-            }
-        };
+       // ... (resto del código igual)
+
+// FUNCIÓN APROBAR CORREGIDA
+window.aprobarComercio = async (id, n, r, w, p, d, u) => {
+    try {
+        await addDoc(collection(db, "comercios"), { 
+            nombre: n, 
+            rubro: r, 
+            whatsapp: w, 
+            pass: p,            // Campo para la contraseña
+            usuario: u,         // Campo para el usuario
+            direccion: d, 
+            rol: "comerciante", // Este campo es vital para la redirección
+            tipo: "comercio"    // Agregamos este marcador extra por seguridad
+        });
+        await deleteDoc(doc(db, "solicitudes", id));
+        alert("Comercio activado con éxito. El usuario '" + u + "' ya puede acceder a su panel de comerciante.");
+    } catch (error) {
+        console.error("Error al aprobar:", error);
+        alert("Error en el proceso de alta.");
+    }
+};
 
         // COMERCIOS ACTIVOS
         onSnapshot(collection(db, "comercios"), (snap) => {
