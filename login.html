@@ -11,7 +11,7 @@
         .input-group { margin-bottom: 15px; text-align: left; }
         label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: bold; }
         input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
-        .btn-entrar { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; }
+        .btn-entrar { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -38,7 +38,6 @@
             const u = document.getElementById('user').value.trim();
             const p = document.getElementById('pass').value.trim();
 
-            // 1. Lógica para Administrador
             if (u === "admin" && p === "123admin") {
                 localStorage.setItem("sesion", "admin");
                 localStorage.setItem("tipo", "admin");
@@ -47,7 +46,6 @@
             }
 
             try {
-                // 2. Lógica para Comerciantes
                 const q = query(collection(db, "comercios"), where("usuario", "==", u));
                 const snap = await getDocs(q);
 
@@ -58,9 +56,10 @@
 
                 let encontrado = false;
                 snap.forEach(doc => {
-                    if (doc.data().pass === p) {
+                    const datos = doc.data();
+                    if (datos.pass === p) {
                         encontrado = true;
-                        localStorage.setItem("sesion", u); // Sincronizado con panel-comerciante
+                        localStorage.setItem("sesion", u);
                         localStorage.setItem("tipo", "comercio");
                     }
                 });
@@ -71,8 +70,7 @@
                     alert("Contraseña incorrecta");
                 }
             } catch (e) {
-                console.error(e);
-                alert("Error de conexión");
+                alert("Error de conexión con la base de datos.");
             }
         };
     </script>
