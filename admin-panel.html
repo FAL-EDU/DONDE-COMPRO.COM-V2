@@ -164,12 +164,13 @@
             res.style.display = 'block';
         };
 
-        // SOLICITUDES (Corregido para pasar argumentos correctamente)
+        // SOLICITUDES - CORREGIDO: Asegura que el usuario y pass pasen en el orden correcto
         onSnapshot(collection(db, "solicitudes"), (snap) => {
             const tbody = document.getElementById('lista-solicitudes');
             tbody.innerHTML = "";
             snap.forEach(d => {
                 const s = d.data();
+                // Importante: El orden de los parámetros en el onclick debe coincidir con la función aprobarComercio
                 tbody.innerHTML += `<tr>
                     <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
                     <td>${s.direccion || '---'}</td>
@@ -180,23 +181,23 @@
             });
         });
 
-        // FUNCIÓN APROBAR (Corregida: guarda 'pass' en lugar de 'password' para compatibilidad con login)
-        window.aprobarComercio = async (id, n, r, w, p, d, u) => {
+        // FUNCIÓN APROBAR - CORREGIDA: Sincroniza nombres de campos con el login ('pass' y 'usuario')
+        window.aprobarComercio = async (id, nombre, rubro, whatsapp, pass, direccion, usuario) => {
             try {
                 await addDoc(collection(db, "comercios"), { 
-                    nombre: n, 
-                    rubro: r, 
-                    whatsapp: w, 
-                    pass: p,      // Se usa 'pass' para que coincida con el sistema de login
-                    usuario: u,   // Se guarda el usuario elegido por el comerciante
-                    direccion: d, 
+                    nombre: nombre, 
+                    rubro: rubro, 
+                    whatsapp: whatsapp, 
+                    pass: pass,      // Cambio crítico: se usa 'pass' para que el login lo encuentre
+                    usuario: usuario, // Se usa el usuario elegido correctamente
+                    direccion: direccion, 
                     rol: "comerciante" 
                 });
                 await deleteDoc(doc(db, "solicitudes", id));
-                alert("Comercio activado con éxito para el usuario: " + u);
+                alert("Comercio activado con éxito para el usuario: " + usuario);
             } catch (error) {
                 console.error("Error al aprobar:", error);
-                alert("Hubo un error al procesar el alta.");
+                alert("Error al procesar el alta.");
             }
         };
 
@@ -216,13 +217,13 @@
             });
         });
 
-        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar definitivamente?")) await deleteDoc(doc(db, col, id)); };
+        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, col, id)); };
 
         document.getElementById('btn-guardar-estetica').onclick = async () => {
             const logo = document.getElementById('logo-url').value;
             const fondo = document.getElementById('fondo-url').value;
             await setDoc(doc(db, "configuracion", "apariencia"), { logoUrl: logo, fondoUrl: fondo });
-            alert("Diseño actualizado correctamente.");
+            alert("Diseño actualizado");
         };
     </script>
 </body>
