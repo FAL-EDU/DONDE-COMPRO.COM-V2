@@ -164,7 +164,7 @@
             res.style.display = 'block';
         };
 
-        // SOLICITUDES (Ahora incluye el usuario elegido por el comerciante)
+        // SOLICITUDES (Corregido para pasar argumentos correctamente)
         onSnapshot(collection(db, "solicitudes"), (snap) => {
             const tbody = document.getElementById('lista-solicitudes');
             tbody.innerHTML = "";
@@ -180,18 +180,24 @@
             });
         });
 
+        // FUNCIÓN APROBAR (Corregida: guarda 'pass' en lugar de 'password' para compatibilidad con login)
         window.aprobarComercio = async (id, n, r, w, p, d, u) => {
-            await addDoc(collection(db, "comercios"), { 
-                nombre: n, 
-                rubro: r, 
-                whatsapp: w, 
-                password: p, 
-                usuario: u, // Usa el usuario que el comerciante eligió
-                direccion: d, 
-                rol: "comerciante" 
-            });
-            await deleteDoc(doc(db, "solicitudes", id));
-            alert("Comercio activado con el usuario: " + u);
+            try {
+                await addDoc(collection(db, "comercios"), { 
+                    nombre: n, 
+                    rubro: r, 
+                    whatsapp: w, 
+                    pass: p,      // Se usa 'pass' para que coincida con el sistema de login
+                    usuario: u,   // Se guarda el usuario elegido por el comerciante
+                    direccion: d, 
+                    rol: "comerciante" 
+                });
+                await deleteDoc(doc(db, "solicitudes", id));
+                alert("Comercio activado con éxito para el usuario: " + u);
+            } catch (error) {
+                console.error("Error al aprobar:", error);
+                alert("Hubo un error al procesar el alta.");
+            }
         };
 
         // COMERCIOS ACTIVOS
@@ -210,13 +216,13 @@
             });
         });
 
-        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, col, id)); };
+        window.eliminarDoc = async (col, id) => { if(confirm("¿Eliminar definitivamente?")) await deleteDoc(doc(db, col, id)); };
 
         document.getElementById('btn-guardar-estetica').onclick = async () => {
             const logo = document.getElementById('logo-url').value;
             const fondo = document.getElementById('fondo-url').value;
             await setDoc(doc(db, "configuracion", "apariencia"), { logoUrl: logo, fondoUrl: fondo });
-            alert("Diseño actualizado");
+            alert("Diseño actualizado correctamente.");
         };
     </script>
 </body>
