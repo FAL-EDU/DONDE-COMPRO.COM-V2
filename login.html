@@ -15,7 +15,7 @@
         if (u === "admin" && p === "123admin") {
             localStorage.setItem("sesion", "admin");
             localStorage.setItem("tipo", "admin");
-            window.location.href = "admin-panel.html"; // Redirige al panel de control total
+            window.location.href = "admin-panel.html";
             return;
         }
 
@@ -34,29 +34,27 @@
 
             querySnapshot.forEach((doc) => {
                 const datos = doc.data();
-                // Usamos 'pass' para coincidir con lo que guarda el admin-panel
-                if (datos.pass === p) {
+                // IMPORTANTE: 'pass' debe coincidir con lo guardado en admin-panel.html
+                if (datos.pass === p || datos.password === p) {
                     loginExitoso = true;
                     datosComercio = datos;
                 }
             });
 
             if (loginExitoso) {
-                // GUARDAR SESIÓN
                 localStorage.setItem("sesion", u);
                 localStorage.setItem("tipo", "comercio");
                 localStorage.setItem("nombreComercio", datosComercio.nombre);
 
-                // --- LA CORRECCIÓN CLAVE ---
-                // Si es un comercio, lo enviamos a su propio panel, NO al del admin
+                // REDIRECCIÓN CORREGIDA: Va a su propio panel de comerciante
                 window.location.href = "comerciante.html"; 
             } else {
                 alert("La contraseña es incorrecta.");
             }
 
         } catch (error) {
-            console.error("Error en el proceso de login:", error);
-            alert("Error de conexión con la base de datos.");
+            console.error("Error en login:", error);
+            alert("Error de conexión. Revisa tu configuración de Firebase.");
         }
     };
 </script>
