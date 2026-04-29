@@ -164,13 +164,12 @@
             res.style.display = 'block';
         };
 
-        // SOLICITUDES - CORREGIDO: Asegura que el usuario y pass pasen en el orden correcto
+        // SOLICITUDES - Sincronizado con la nueva función de aprobación
         onSnapshot(collection(db, "solicitudes"), (snap) => {
             const tbody = document.getElementById('lista-solicitudes');
             tbody.innerHTML = "";
             snap.forEach(d => {
                 const s = d.data();
-                // Importante: El orden de los parámetros en el onclick debe coincidir con la función aprobarComercio
                 tbody.innerHTML += `<tr>
                     <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
                     <td>${s.direccion || '---'}</td>
@@ -181,29 +180,28 @@
             });
         });
 
-        // FUNCIÓN APROBAR - CORREGIDA: Sincroniza nombres de campos con el login ('pass' y 'usuario')
-       // ... (resto del código igual)
-
-// FUNCIÓN APROBAR CORREGIDA
-window.aprobarComercio = async (id, n, r, w, p, d, u) => {
-    try {
-        await addDoc(collection(db, "comercios"), { 
-            nombre: n, 
-            rubro: r, 
-            whatsapp: w, 
-            pass: p,            // Campo para la contraseña
-            usuario: u,         // Campo para el usuario
-            direccion: d, 
-            rol: "comerciante", // Este campo es vital para la redirección
-            tipo: "comercio"    // Agregamos este marcador extra por seguridad
-        });
-        await deleteDoc(doc(db, "solicitudes", id));
-        alert("Comercio activado con éxito. El usuario '" + u + "' ya puede acceder a su panel de comerciante.");
-    } catch (error) {
-        console.error("Error al aprobar:", error);
-        alert("Error en el proceso de alta.");
-    }
-};
+        // FUNCIÓN APROBAR CORREGIDA E INTEGRADA
+        window.aprobarComercio = async (id, n, r, w, p, d, u) => {
+            try {
+                // Guardamos con los campos exactos que espera login.html ('pass' y 'usuario')
+                await addDoc(collection(db, "comercios"), { 
+                    nombre: n, 
+                    rubro: r, 
+                    whatsapp: w, 
+                    pass: p,            // Contraseña elegida por el comerciante
+                    usuario: u,         // Usuario elegido por el comerciante
+                    direccion: d, 
+                    rol: "comerciante", // Define que NO es un administrador
+                    tipo: "comercio"
+                });
+                // Borramos la solicitud una vez aprobada
+                await deleteDoc(doc(db, "solicitudes", id));
+                alert("Comercio activado con éxito. El usuario '" + u + "' ya puede acceder a comerciante.html");
+            } catch (error) {
+                console.error("Error al aprobar:", error);
+                alert("Error en el proceso de alta.");
+            }
+        };
 
         // COMERCIOS ACTIVOS
         onSnapshot(collection(db, "comercios"), (snap) => {
