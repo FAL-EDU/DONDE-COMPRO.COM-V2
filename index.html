@@ -8,7 +8,31 @@
         :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --light: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--light); color: #333; }
         
-        /* Header con soporte para personalización */
+        /* BOTÓN RECUPERADO: ACCESO USUARIOS (Admin y Comerciantes) */
+        .admin-access {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+        }
+        .btn-usuarios {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-usuarios:hover { background: white; color: var(--primary); }
+
+        /* Header con soporte para Logo y Fondo dinámico */
         header { 
             background: var(--primary); 
             color: white; 
@@ -16,40 +40,25 @@
             text-align: center; 
             background-size: cover; 
             background-position: center;
-            transition: 0.5s;
+            position: relative;
         }
-        .logo-img { max-width: 150px; margin-bottom: 15px; border-radius: 10px; }
+        .logo-img { max-width: 110px; margin-bottom: 10px; border-radius: 12px; }
         
-        /* Buscador Estilizado */
+        /* Buscador Flotante */
         .search-container {
-            max-width: 800px;
-            margin: -40px auto 20px;
+            max-width: 750px;
+            margin: -35px auto 20px;
             background: white;
             padding: 12px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             display: flex;
             gap: 10px;
         }
-        .search-container input { flex: 1; padding: 18px; border: 1px solid #eee; border-radius: 10px; font-size: 1rem; outline: none; }
-        .btn-buscar { background: var(--secondary); color: white; border: none; padding: 0 35px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .search-container input { flex: 1; padding: 16px; border: 1px solid #eee; border-radius: 10px; outline: none; font-size: 1rem; }
+        .btn-buscar { background: var(--secondary); color: white; border: none; padding: 0 30px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* Botón de Registro Central */
-        .btn-registro-trigger {
-            display: inline-block;
-            background: var(--accent);
-            color: white;
-            padding: 18px 40px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.3);
-            margin-top: 50px;
-            transition: 0.3s;
-        }
-        .btn-registro-trigger:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(243, 156, 18, 0.5); }
-
-        /* MODAL DE SOLICITUD */
+        /* MODAL RESPONSIVO (No se sale de la pantalla) */
         .modal {
             display: none;
             position: fixed;
@@ -58,45 +67,40 @@
             z-index: 2000;
             align-items: center;
             justify-content: center;
+            padding: 15px;
         }
         .modal-content {
             background: white;
-            padding: 40px;
+            padding: 30px;
             border-radius: 20px;
-            width: 95%;
-            max-width: 450px;
+            width: 100%;
+            max-width: 420px;
             position: relative;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            max-height: 95vh; /* Evita que se oculte el final */
+            overflow-y: auto; /* Permite scroll interno */
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
-        .close { position: absolute; top: 20px; right: 25px; font-size: 30px; cursor: pointer; color: #bbb; }
+        .close { position: sticky; top: 0; float: right; font-size: 30px; cursor: pointer; color: #bbb; margin-top: -15px; }
         
-        .modal-content h2 { margin: 0 0 10px; color: var(--primary); font-size: 1.8rem; }
+        .modal-content h2 { margin: 0 0 5px; color: var(--primary); }
         .modal-content input, .modal-content select {
             width: 100%;
-            padding: 14px;
-            margin: 10px 0;
+            padding: 13px;
+            margin: 8px 0;
             border: 1px solid #ddd;
             border-radius: 10px;
             box-sizing: border-box;
-            font-size: 0.95rem;
         }
         
-        /* Bloque de Usuarios (Lo que faltaba) */
+        /* Bloque de Credenciales para que impacte el "Usuario" */
         .credenciales-box {
             background: #f1f8f4;
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
-            margin: 15px 0;
-            border: 2px dashed var(--secondary);
+            margin: 12px 0;
+            border: 1px solid var(--secondary);
         }
-        .credenciales-box label { 
-            font-size: 0.75rem; 
-            color: var(--secondary); 
-            font-weight: 800; 
-            display: block; 
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
+        .credenciales-box label { font-size: 0.75rem; color: var(--secondary); font-weight: bold; display: block; margin-bottom: 5px; }
         
         .btn-enviar {
             width: 100%;
@@ -108,22 +112,37 @@
             font-weight: bold;
             font-size: 1.1rem;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-registro-trigger {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+            margin: 40px 0;
+            transition: 0.3s;
         }
     </style>
 </head>
 <body>
 
     <header id="main-header">
-        <div id="header-content">
-            <img src="" id="main-logo" class="logo-img" alt="Logo" style="display:none;">
-            <h1 id="site-title" style="margin:0; font-size: 2.5rem;">DÓNDE COMPRO</h1>
-            <p style="opacity: 0.9;">Localización de productos cercanos</p>
+        <div class="admin-access">
+            <a href="admin-panel.html" class="btn-usuarios">👤 ACCESO USUARIOS</a>
         </div>
+
+        <img src="" id="main-logo" class="logo-img" alt="Logo" style="display:none;">
+        <h1 id="site-title">DÓNDE COMPRO</h1>
+        <p>Localización de productos cercanos</p>
     </header>
 
     <div class="search-container">
-        <input type="text" id="input-busqueda" placeholder="¿Qué buscas hoy? (ej: Farmacia, Pizza, Supermercado...)">
+        <input type="text" id="input-busqueda" placeholder="¿Qué buscas hoy?">
         <button class="btn-buscar">BUSCAR</button>
     </div>
 
@@ -137,51 +156,50 @@
         <div class="modal-content">
             <span class="close" onclick="cerrarModal()">&times;</span>
             <h2>Solicitud de Admisión</h2>
-            <p style="color: #666; font-size: 0.95rem; margin-bottom: 20px;">Únete a nuestra red de comercios locales.</p>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Crea tu espacio en nuestra red.</p>
             
-            <input type="text" id="reg-nombre" placeholder="Nombre de tu Comercio">
+            <input type="text" id="reg-nombre" placeholder="Nombre del Comercio">
             
             <select id="reg-rubro">
                 <option value="">Selecciona tu Rubro...</option>
                 </select>
 
-            <input type="text" id="reg-direccion" placeholder="Dirección Exacta">
+            <input type="text" id="reg-direccion" placeholder="Dirección del Local">
             
-            <input type="text" id="reg-whatsapp" placeholder="WhatsApp (ej: 3876543210)">
+            <input type="text" id="reg-whatsapp" placeholder="WhatsApp (ej: 3876...)">
 
             <div class="credenciales-box">
-                <label>🔐 Datos para entrar a tu Panel:</label>
-                <input type="text" id="reg-usuario" placeholder="Crea un nombre de Usuario" style="border-color: var(--secondary);">
-                <input type="password" id="reg-pass" placeholder="Crea tu Contraseña de acceso">
+                <label>🔐 DATOS DE ACCESO:</label>
+                <input type="text" id="reg-usuario" placeholder="Elige tu nombre de Usuario">
+                <input type="password" id="reg-pass" placeholder="Crea tu Contraseña">
             </div>
 
-            <button class="btn-enviar" id="btn-enviar-solicitud">ENVIAR MI SOLICITUD</button>
+            <button class="btn-enviar" id="btn-enviar-solicitud">ENVIAR SOLICITUD</button>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, addDoc, getDocs, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, addDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Carga de estética desde el panel admin
-        async function aplicarEstetica() {
+        // Cargar Logo y Fondo del Admin
+        async function loadUI() {
             const config = await getDoc(doc(db, "configuracion", "apariencia"));
             if(config.exists()) {
                 const { logoUrl, fondoUrl } = config.data();
                 if(logoUrl) { 
-                    const logo = document.getElementById('main-logo');
-                    logo.src = logoUrl;
-                    logo.style.display = 'inline-block';
+                    const img = document.getElementById('main-logo');
+                    img.src = logoUrl; img.style.display = 'inline-block';
                 }
                 if(fondoUrl) {
                     document.getElementById('main-header').style.backgroundImage = 
-                        `linear-gradient(rgba(44, 62, 80, 0.85), rgba(44, 62, 80, 0.85)), url('${fondoUrl}')`;
+                        `linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8)), url('${fondoUrl}')`;
                 }
             }
         }
-        aplicarEstetica();
+        loadUI();
 
-        // Carga dinámica de rubros
+        // Cargar Rubros
         onSnapshot(collection(db, "rubros"), (snap) => {
             const select = document.getElementById('reg-rubro');
             select.innerHTML = '<option value="">Selecciona tu Rubro...</option>';
@@ -190,31 +208,31 @@
             });
         });
 
-        // Envío de solicitud con el campo de usuario incluido
+        // Envío de Solicitud (Capturando el Usuario)
         document.getElementById('btn-enviar-solicitud').onclick = async () => {
             const nombre = document.getElementById('reg-nombre').value;
             const rubro = document.getElementById('reg-rubro').value;
-            const direccion = document.getElementById('reg-direccion').value;
-            const whatsapp = document.getElementById('reg-whatsapp').value;
-            const usuario_elegido = document.getElementById('reg-usuario').value; // CAMPO CLAVE
+            const usuario_elegido = document.getElementById('reg-usuario').value;
             const pass = document.getElementById('reg-pass').value;
 
-            if(!nombre || !rubro || !usuario_elegido || !pass) {
-                alert("Por favor completa los datos de acceso (Usuario y Contraseña).");
+            if(!nombre || !usuario_elegido || !pass) {
+                alert("Completa los campos obligatorios para el registro.");
                 return;
             }
 
             try {
                 await addDoc(collection(db, "solicitudes"), {
-                    nombre, rubro, direccion, whatsapp,
-                    usuario_elegido, // Se envía a Firebase
+                    nombre, rubro, 
+                    direccion: document.getElementById('reg-direccion').value,
+                    whatsapp: document.getElementById('reg-whatsapp').value,
+                    usuario_elegido, // Dato que llega al admin
                     pass,
                     fecha: new Date().toLocaleString()
                 });
-                alert("¡Excelente! Tu solicitud con el usuario '" + usuario_elegido + "' ha sido enviada.");
+                alert("¡Solicitud enviada con éxito!");
                 cerrarModal();
             } catch (e) {
-                alert("Error de conexión. Intenta de nuevo.");
+                alert("Error al procesar. Revisa tu conexión.");
             }
         };
 
