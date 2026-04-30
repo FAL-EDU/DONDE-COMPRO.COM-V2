@@ -11,7 +11,7 @@
             --danger: #e74c3c;
             --light: #f4f7f6; 
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--light); margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
         .container { max-width: 1100px; margin: auto; }
         
         header { 
@@ -30,18 +30,12 @@
         th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.85rem; color: #666; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
 
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 5px; font-weight: 600; }
-        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        
         .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-save { background: var(--primary); color: white; width: 100%; }
         .btn-approve { background: var(--secondary); color: white; font-size: 0.8rem; }
         .btn-delete { background: var(--danger); color: white; font-size: 0.8rem; }
         .btn-logout { background: #95a5a6; color: white; }
 
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-        .bg-user { background: #e8f5e9; color: #2e7d32; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
 
         @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
     </style>
@@ -55,21 +49,15 @@
         </header>
 
         <div class="grid">
-            <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN GLOBAL -->
+            <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN -->
             <div class="card">
                 <h2>Estética del Sitio</h2>
-                <div class="form-group">
-                    <label>URL Logo Institucional:</label>
-                    <input type="text" id="cfg-logo" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label>URL Fondo de Agua:</label>
-                    <input type="text" id="cfg-fondo" placeholder="https://...">
-                </div>
-                <button class="btn btn-save" onclick="guardarConfiguracion()">Guardar Apariencia</button>
+                <input type="text" id="cfg-logo" placeholder="URL Logo..." style="width:100%; margin-bottom:10px; padding:8px;">
+                <input type="text" id="cfg-fondo" placeholder="URL Fondo..." style="width:100%; margin-bottom:10px; padding:8px;">
+                <button class="btn btn-approve" style="width:100%" onclick="guardarConfiguracion()">Guardar Apariencia</button>
             </div>
 
-            <!-- COLUMNA DERECHA: GESTIÓN DE COMERCIOS -->
+            <!-- COLUMNA DERECHA: GESTIÓN -->
             <div class="main-content">
                 <div class="card">
                     <h2>Nuevas Solicitudes</h2>
@@ -82,9 +70,7 @@
                                 <th>Acción</th>
                             </tr>
                         </thead>
-                        <tbody id="lista-solicitudes">
-                            <!-- Datos dinámicos -->
-                        </tbody>
+                        <tbody id="lista-solicitudes"></tbody>
                     </table>
                 </div>
 
@@ -99,9 +85,7 @@
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="lista-comercios">
-                            <!-- Datos dinámicos -->
-                        </tbody>
+                        <tbody id="lista-comercios"></tbody>
                     </table>
                 </div>
             </div>
@@ -110,17 +94,14 @@
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, query, getDocs, doc, setDoc, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, query, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Verificación de acceso Admin (Solo correos autorizados)
-        const adminEmail = localStorage.getItem("sesion");
-        const tipoUser = localStorage.getItem("tipo");
-        
-        if (!adminEmail || tipoUser !== "admin") {
-            window.location.href = 'login.html';
-        }
+        // Función para extraer el usuario de forma segura
+        const obtenerIdentificador = (data) => {
+            // Buscamos en todas las etiquetas posibles que pudo haber usado el formulario
+            return data.usuario || data.email || data.user || data.correo || "S/D";
+        };
 
-        // --- CARGAR DATOS ---
         const cargarAdminPanel = async () => {
             // 1. Solicitudes Pendientes
             const snapSoli = await getDocs(collection(db, "solicitudes"));
@@ -128,78 +109,60 @@
             listaSoli.innerHTML = "";
             snapSoli.forEach(d => {
                 const s = d.data();
+                const user = obtenerIdentificador(s);
                 listaSoli.innerHTML += `
                     <tr>
-                        <td>${s.nombre}</td>
-                        <td>${s.whatsapp}</td>
-                        <td><small>${s.usuario || s.email}</small></td>
+                        <td>${s.nombre || "Sin nombre"}</td>
+                        <td>${s.whatsapp || "-"}</td>
+                        <td style="color: ${user === 'S/D' ? 'red' : 'inherit'}"><strong>${user}</strong></td>
                         <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Aprobar</button></td>
                     </tr>`;
             });
 
-            // 2. Comercios Activados (Corrección de Undefined)
+            // 2. Comercios Activados
             const snapCom = await getDocs(collection(db, "comercios"));
             const listaCom = document.getElementById('lista-comercios');
             listaCom.innerHTML = "";
             snapCom.forEach(d => {
                 const c = d.data();
-                // Prioridad para mostrar el identificador sin errores
-                const idMostrable = c.usuario || c.email || "S/D";
+                const user = obtenerIdentificador(c);
                 listaCom.innerHTML += `
                     <tr>
-                        <td><strong>${c.nombre}</strong></td>
-                        <td>${c.direccion || 'Pendiente'}</td>
-                        <td><span class="status-badge bg-user">${idMostrable}</span></td>
+                        <td><strong>${c.nombre || "Comercio"}</strong></td>
+                        <td>${c.direccion || "-"}</td>
+                        <td><span class="status-badge">${user}</span></td>
                         <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Eliminar</button></td>
                     </tr>`;
             });
         };
 
-        // --- ACCIONES ---
         window.activarComercio = async (id) => {
-            if(!confirm("¿Autorizar este comercio para operar en la plataforma?")) return;
-            
             const docRef = doc(db, "solicitudes", id);
-            const docSnap = await getDoc(docRef);
-            
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                // Mover a la colección de comercios oficiales
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+                const data = snap.data();
+                // Al activar, nos aseguramos de que el campo se llame 'usuario' para siempre
+                const finalUser = obtenerIdentificador(data);
                 await setDoc(doc(db, "comercios", id), {
                     ...data,
-                    estado: "activo",
-                    fechaActivacion: new Date()
+                    usuario: finalUser, // Normalizamos el nombre del campo aquí
+                    estado: "activo"
                 });
-                // Borrar de solicitudes
                 await deleteDoc(docRef);
-                alert("Comercio activado con éxito");
+                alert("¡Comercio Activado!");
                 cargarAdminPanel();
             }
         };
 
         window.eliminarComercio = async (id) => {
-            if(confirm("¿Estás seguro de eliminar este comercio definitivamente?")) {
+            if(confirm("¿Eliminar definitivamente?")) {
                 await deleteDoc(doc(db, "comercios", id));
                 cargarAdminPanel();
             }
         };
 
-        window.guardarConfiguracion = async () => {
-            const config = {
-                logoUrl: document.getElementById('cfg-logo').value,
-                fondoUrl: document.getElementById('cfg-fondo').value,
-                ultimaEdicion: new Date()
-            };
-            await setDoc(doc(db, "configuracion", "global"), config);
-            alert("Configuración estética guardada");
-        };
+        window.cerrarSesion = () => { localStorage.clear(); window.location.href = 'login.html'; };
 
-        window.cerrarSesion = () => {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        };
-
-        // Inicializar
         cargarAdminPanel();
     </script>
 </body>
