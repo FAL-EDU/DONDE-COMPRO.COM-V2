@@ -35,7 +35,9 @@
         .btn-delete { background: var(--danger); color: white; font-size: 0.8rem; }
         .btn-logout { background: #95a5a6; color: white; }
 
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
+        /* Estilo para el usuario encontrado */
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; display: inline-block; }
+        .no-data { color: #e74c3c; font-weight: bold; }
 
         @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
     </style>
@@ -49,15 +51,21 @@
         </header>
 
         <div class="grid">
-            <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN -->
+            <!-- PANEL IZQUIERDO -->
             <div class="card">
                 <h2>Estética del Sitio</h2>
-                <input type="text" id="cfg-logo" placeholder="URL Logo..." style="width:100%; margin-bottom:10px; padding:8px;">
-                <input type="text" id="cfg-fondo" placeholder="URL Fondo..." style="width:100%; margin-bottom:10px; padding:8px;">
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.8rem; color:#666;">URL LOGO</label>
+                    <input type="text" id="cfg-logo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.8rem; color:#666;">URL FONDO</label>
+                    <input type="text" id="cfg-fondo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                </div>
                 <button class="btn btn-approve" style="width:100%" onclick="guardarConfiguracion()">Guardar Apariencia</button>
             </div>
 
-            <!-- COLUMNA DERECHA: GESTIÓN -->
+            <!-- PANEL DERECHO -->
             <div class="main-content">
                 <div class="card">
                     <h2>Nuevas Solicitudes</h2>
@@ -66,7 +74,7 @@
                             <tr>
                                 <th>Comercio</th>
                                 <th>WhatsApp</th>
-                                <th>Usuario / Pass</th>
+                                <th>Usuario / Email</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -96,25 +104,25 @@
         import { db } from './firebase-config.js';
         import { collection, query, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Función para extraer el usuario de forma segura
-        const obtenerIdentificador = (data) => {
-            // Buscamos en todas las etiquetas posibles que pudo haber usado el formulario
-            return data.usuario || data.email || data.user || data.correo || "S/D";
+        // FUNCIÓN CLAVE: Busca el usuario en cualquier campo posible
+        const buscarUsuario = (data) => {
+            // Revisa todas las etiquetas comunes que pudo enviar el formulario de registro
+            return data.usuario || data.email || data.correo || data.user || data.login || null;
         };
 
-        const cargarAdminPanel = async () => {
-            // 1. Solicitudes Pendientes
+        const cargarPanel = async () => {
+            // 1. Solicitudes
             const snapSoli = await getDocs(collection(db, "solicitudes"));
             const listaSoli = document.getElementById('lista-solicitudes');
             listaSoli.innerHTML = "";
             snapSoli.forEach(d => {
                 const s = d.data();
-                const user = obtenerIdentificador(s);
+                const u = buscarUsuario(s);
                 listaSoli.innerHTML += `
                     <tr>
-                        <td>${s.nombre || "Sin nombre"}</td>
+                        <td>${s.nombre || "S/N"}</td>
                         <td>${s.whatsapp || "-"}</td>
-                        <td style="color: ${user === 'S/D' ? 'red' : 'inherit'}"><strong>${user}</strong></td>
+                        <td>${u ? `<strong>${u}</strong>` : '<span class="no-data">S/D</span>'}</td>
                         <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Aprobar</button></td>
                     </tr>`;
             });
@@ -125,12 +133,12 @@
             listaCom.innerHTML = "";
             snapCom.forEach(d => {
                 const c = d.data();
-                const user = obtenerIdentificador(c);
+                const u = buscarUsuario(c);
                 listaCom.innerHTML += `
                     <tr>
                         <td><strong>${c.nombre || "Comercio"}</strong></td>
                         <td>${c.direccion || "-"}</td>
-                        <td><span class="status-badge">${user}</span></td>
+                        <td><span class="status-badge">${u || "Sin Usuario"}</span></td>
                         <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Eliminar</button></td>
                     </tr>`;
             });
@@ -141,29 +149,30 @@
             const snap = await getDoc(docRef);
             if (snap.exists()) {
                 const data = snap.data();
-                // Al activar, nos aseguramos de que el campo se llame 'usuario' para siempre
-                const finalUser = obtenerIdentificador(data);
+                // NORMALIZACIÓN: Al activar, guardamos el dato SIEMPRE como 'usuario'
+                const emailFinal = buscarUsuario(data);
                 await setDoc(doc(db, "comercios", id), {
                     ...data,
-                    usuario: finalUser, // Normalizamos el nombre del campo aquí
-                    estado: "activo"
+                    usuario: emailFinal, 
+                    estado: "activo",
+                    fechaActivacion: new Date().toISOString()
                 });
                 await deleteDoc(docRef);
                 alert("¡Comercio Activado!");
-                cargarAdminPanel();
+                cargarPanel();
             }
         };
 
         window.eliminarComercio = async (id) => {
-            if(confirm("¿Eliminar definitivamente?")) {
+            if(confirm("¿Seguro que deseas eliminarlo?")) {
                 await deleteDoc(doc(db, "comercios", id));
-                cargarAdminPanel();
+                cargarPanel();
             }
         };
 
         window.cerrarSesion = () => { localStorage.clear(); window.location.href = 'login.html'; };
-
-        cargarAdminPanel();
+        
+        cargarPanel();
     </script>
 </body>
 </html>
