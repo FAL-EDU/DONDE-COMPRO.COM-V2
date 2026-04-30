@@ -4,26 +4,74 @@
     <meta charset="UTF-8">
     <title>Registro de Comercio - DÓNDE COMPRO.COM</title>
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .form-registro { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
         input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .btn-enviar { width: 100%; background-color: #3498db; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-enviar { width: 100%; background-color: #27ae60; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        .btn-enviar:hover { background-color: #219150; }
         .nota { font-size: 12px; color: #7f8c8d; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
     <div class="form-registro">
         <h2>Registro de Comercio</h2>
-        <form>
-            <input type="text" placeholder="Nombre del Comercio" required>
-            <input type="email" placeholder="Correo Electrónico (Login)" required>
-            <input type="password" placeholder="Contraseña segura" required>
-            <input type="text" placeholder="Dirección exacta" required>
-            <textarea placeholder="Breve descripción del rubro (ej. Carnicería, Regalería)"></textarea>
-            <button type="button" class="btn-enviar">SOLICITAR ALOJAMIENTO</button>
+        <form id="formRegistro">
+            <!-- Agregamos IDs para que el código pueda leer los valores -->
+            <input type="text" id="reg-nombre" placeholder="Nombre del Comercio" required>
+            <input type="email" id="reg-usuario" placeholder="Correo Electrónico (Será tu Usuario)" required>
+            <input type="password" id="reg-pass" placeholder="Contraseña segura" required>
+            <input type="text" id="reg-whatsapp" placeholder="Número de WhatsApp" required>
+            <input type="text" id="reg-direccion" placeholder="Dirección exacta" required>
+            <textarea id="reg-rubro" placeholder="Breve descripción del rubro (ej. Carnicería, Regalería)"></textarea>
+            
+            <button type="button" class="btn-enviar" onclick="enviarSolicitud()">SOLICITAR ALOJAMIENTO</button>
         </form>
-        <p class="nota">Su solicitud será revisada por un administrador antes de ser activada. [cite: 17]</p>
+        <p class="nota">Su solicitud será revisada por un administrador antes de ser activada.</p>
     </div>
+
+    <!-- Lógica de Conexión a Firebase -->
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        window.enviarSolicitud = async () => {
+            // Capturamos los datos del formulario
+            const nombre = document.getElementById('reg-nombre').value;
+            const usuario = document.getElementById('reg-usuario').value;
+            const pass = document.getElementById('reg-pass').value;
+            const whatsapp = document.getElementById('reg-whatsapp').value;
+            const direccion = document.getElementById('reg-direccion').value;
+            const rubro = document.getElementById('reg-rubro').value;
+
+            // Validación simple
+            if(!nombre || !usuario || !pass || !whatsapp) {
+                alert("Por favor, completa los campos obligatorios.");
+                return;
+            }
+
+            try {
+                // GUARDADO CLAVE: Usamos la etiqueta 'usuario' para que el Admin lo vea bien
+                await addDoc(collection(db, "solicitudes"), {
+                    nombre: nombre,
+                    usuario: usuario, // <--- Aquí está la solución al "undefined"
+                    pass: pass,
+                    whatsapp: whatsapp,
+                    direccion: direccion,
+                    rubro: rubro,
+                    fechaSolicitud: new Date().toISOString(),
+                    estado: "pendiente"
+                });
+
+                alert("¡Solicitud enviada! Espera a que el administrador te active.");
+                document.getElementById('formRegistro').reset();
+                window.location.href = "index.html"; // Redirigir al inicio
+
+            } catch (error) {
+                console.error("Error al enviar:", error);
+                alert("Hubo un error al enviar tu solicitud. Intenta más tarde.");
+            }
+        };
+    </script>
 </body>
 </html>
