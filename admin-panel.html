@@ -3,30 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - DÓNDE COMPRO</title>
+    <title>Admin Panel - DÓNDE COMPRO</title>
     <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --danger: #e74c3c; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1150px; margin: auto; }
+        :root { 
+            --primary: #2c3e50; 
+            --secondary: #27ae60; 
+            --danger: #e74c3c;
+            --light: #f4f7f6; 
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--light); margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; }
         
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; margin-bottom: 30px; }
-        h1 { color: var(--primary); margin: 0; font-size: 1.8rem; }
-        .btn-logout { background: #7f8c8d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        header { 
+            background: white; padding: 15px 25px; border-radius: 12px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 25px; border-bottom: 4px solid var(--secondary);
+        }
 
-        .grid { display: grid; grid-template-columns: 320px 1fr; gap: 25px; align-items: start; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 25px; }
-        h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; border-left: 5px solid var(--secondary); padding-left: 10px; }
-
+        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        h2 { font-size: 1.2rem; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; margin-bottom: 20px; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #f8f9fa; text-align: left; padding: 12px; border-bottom: 2px solid #eee; }
+        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.85rem; color: #666; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        
-        .btn-approve { background: var(--secondary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-delete { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .badge { background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
 
-        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-save { background: var(--primary); color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 5px; font-weight: 600; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-save { background: var(--primary); color: white; width: 100%; }
+        .btn-approve { background: var(--secondary); color: white; font-size: 0.8rem; }
+        .btn-delete { background: var(--danger); color: white; font-size: 0.8rem; }
+        .btn-logout { background: #95a5a6; color: white; }
+
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .bg-user { background: #e8f5e9; color: #2e7d32; }
+
+        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -34,22 +51,26 @@
     <div class="container">
         <header>
             <h1>🛡️ Panel de Administración</h1>
-            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+            <button class="btn btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
         </header>
 
         <div class="grid">
-            <aside>
-                <div class="card">
-                    <h2>Estética del Sitio</h2>
-                    <label>URL Logo:</label>
-                    <input type="text" id="logo-url" placeholder="https://...">
-                    <label>URL Fondo:</label>
-                    <input type="text" id="fondo-url" placeholder="https://...">
-                    <button class="btn-save" id="btn-guardar-estetica">Guardar Apariencia</button>
+            <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN GLOBAL -->
+            <div class="card">
+                <h2>Estética del Sitio</h2>
+                <div class="form-group">
+                    <label>URL Logo Institucional:</label>
+                    <input type="text" id="cfg-logo" placeholder="https://...">
                 </div>
-            </aside>
+                <div class="form-group">
+                    <label>URL Fondo de Agua:</label>
+                    <input type="text" id="cfg-fondo" placeholder="https://...">
+                </div>
+                <button class="btn btn-save" onclick="guardarConfiguracion()">Guardar Apariencia</button>
+            </div>
 
-            <main>
+            <!-- COLUMNA DERECHA: GESTIÓN DE COMERCIOS -->
+            <div class="main-content">
                 <div class="card">
                     <h2>Nuevas Solicitudes</h2>
                     <table>
@@ -62,7 +83,8 @@
                             </tr>
                         </thead>
                         <tbody id="lista-solicitudes">
-                            </tbody>
+                            <!-- Datos dinámicos -->
+                        </tbody>
                     </table>
                 </div>
 
@@ -78,105 +100,107 @@
                             </tr>
                         </thead>
                         <tbody id="lista-comercios">
-                            </tbody>
+                            <!-- Datos dinámicos -->
+                        </tbody>
                     </table>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { 
-            collection, onSnapshot, doc, addDoc, deleteDoc, setDoc, query, where 
-        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, query, getDocs, doc, setDoc, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. SEGURIDAD: Solo admin puede estar aquí
-        if (localStorage.getItem("sesion") !== "admin") {
-            window.location.href = "login.html";
+        // Verificación de acceso Admin (Solo correos autorizados)
+        const adminEmail = localStorage.getItem("sesion");
+        const tipoUser = localStorage.getItem("tipo");
+        
+        if (!adminEmail || tipoUser !== "admin") {
+            window.location.href = 'login.html';
         }
 
-        // 2. LISTAR SOLICITUDES PENDIENTES
-        onSnapshot(collection(db, "solicitudes"), (snap) => {
-            const tbody = document.getElementById('lista-solicitudes');
-            tbody.innerHTML = "";
-            snap.forEach(d => {
+        // --- CARGAR DATOS ---
+        const cargarAdminPanel = async () => {
+            // 1. Solicitudes Pendientes
+            const snapSoli = await getDocs(collection(db, "solicitudes"));
+            const listaSoli = document.getElementById('lista-solicitudes');
+            listaSoli.innerHTML = "";
+            snapSoli.forEach(d => {
                 const s = d.data();
-                tbody.innerHTML += `
+                listaSoli.innerHTML += `
                     <tr>
-                        <td><strong>${s.nombre}</strong><br><small>${s.rubro}</small></td>
+                        <td>${s.nombre}</td>
                         <td>${s.whatsapp}</td>
-                        <td><small>U: ${s.usuario}<br>P: ${s.pass}</small></td>
-                        <td>
-                            <button class="btn-approve" onclick="aprobarComercio('${d.id}','${s.nombre}','${s.rubro}','${s.whatsapp}','${s.pass}','${s.direccion}','${s.usuario}')">Aprobar</button>
-                        </td>
+                        <td><small>${s.usuario || s.email}</small></td>
+                        <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Aprobar</button></td>
                     </tr>`;
             });
-        });
 
-        // 3. FUNCIÓN PARA APROBAR (Mueve de 'solicitudes' a 'comercios')
-        window.aprobarComercio = async (id, n, r, w, p, d, u) => {
-            try {
-                // Guardamos en la colección definitiva con los campos sincronizados
-                await addDoc(collection(db, "comercios"), {
-                    nombre: n,
-                    rubro: r,
-                    whatsapp: w,
-                    pass: p,       // Campo clave para el login
-                    usuario: u,    // Campo clave para el login
-                    direccion: d,
-                    rol: "comerciante"
-                });
-                // Borramos la solicitud pendiente
-                await deleteDoc(doc(db, "solicitudes", id));
-                alert("¡Comercio activado con éxito!");
-            } catch (error) {
-                console.error(error);
-                alert("Error al aprobar el comercio.");
-            }
-        };
-
-        // 4. LISTAR COMERCIOS ACTIVOS
-        onSnapshot(collection(db, "comercios"), (snap) => {
-            const tbody = document.getElementById('lista-comercios');
-            tbody.innerHTML = "";
-            snap.forEach(d => {
+            // 2. Comercios Activados (Corrección de Undefined)
+            const snapCom = await getDocs(collection(db, "comercios"));
+            const listaCom = document.getElementById('lista-comercios');
+            listaCom.innerHTML = "";
+            snapCom.forEach(d => {
                 const c = d.data();
-                tbody.innerHTML += `
+                // Prioridad para mostrar el identificador sin errores
+                const idMostrable = c.usuario || c.email || "S/D";
+                listaCom.innerHTML += `
                     <tr>
                         <td><strong>${c.nombre}</strong></td>
-                        <td>${c.direccion}</td>
-                        <td><span class="badge">${c.usuario}</span></td>
-                        <td>
-                            <button class="btn-delete" onclick="eliminarDoc('comercios','${d.id}')">Eliminar</button>
-                        </td>
+                        <td>${c.direccion || 'Pendiente'}</td>
+                        <td><span class="status-badge bg-user">${idMostrable}</span></td>
+                        <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Eliminar</button></td>
                     </tr>`;
             });
-        });
+        };
 
-        // 5. ELIMINAR DOCUMENTOS
-        window.eliminarDoc = async (col, id) => {
-            if (confirm("¿Estás seguro de eliminar este registro?")) {
-                await deleteDoc(doc(db, col, id));
+        // --- ACCIONES ---
+        window.activarComercio = async (id) => {
+            if(!confirm("¿Autorizar este comercio para operar en la plataforma?")) return;
+            
+            const docRef = doc(db, "solicitudes", id);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // Mover a la colección de comercios oficiales
+                await setDoc(doc(db, "comercios", id), {
+                    ...data,
+                    estado: "activo",
+                    fechaActivacion: new Date()
+                });
+                // Borrar de solicitudes
+                await deleteDoc(docRef);
+                alert("Comercio activado con éxito");
+                cargarAdminPanel();
             }
         };
 
-        // 6. GUARDAR ESTÉTICA
-        document.getElementById('btn-guardar-estetica').onclick = async () => {
-            const logo = document.getElementById('logo-url').value;
-            const fondo = document.getElementById('fondo-url').value;
-            await setDoc(doc(db, "configuracion", "apariencia"), { 
-                logoUrl: logo, 
-                fondoUrl: fondo 
-            });
-            alert("Apariencia actualizada en la base de datos.");
+        window.eliminarComercio = async (id) => {
+            if(confirm("¿Estás seguro de eliminar este comercio definitivamente?")) {
+                await deleteDoc(doc(db, "comercios", id));
+                cargarAdminPanel();
+            }
         };
 
-        // 7. CERRAR SESIÓN
+        window.guardarConfiguracion = async () => {
+            const config = {
+                logoUrl: document.getElementById('cfg-logo').value,
+                fondoUrl: document.getElementById('cfg-fondo').value,
+                ultimaEdicion: new Date()
+            };
+            await setDoc(doc(db, "configuracion", "global"), config);
+            alert("Configuración estética guardada");
+        };
+
         window.cerrarSesion = () => {
             localStorage.clear();
-            window.location.href = "login.html";
+            window.location.href = 'login.html';
         };
+
+        // Inicializar
+        cargarAdminPanel();
     </script>
 </body>
 </html>
