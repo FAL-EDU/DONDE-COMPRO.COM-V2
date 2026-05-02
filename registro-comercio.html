@@ -3,140 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Comercio - DÓNDE COMPRO.COM</title>
+    <title>Registro de Comercio - Dónde Compro</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-        
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background-color: #f0f2f5; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-        }
-        .form-registro { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 15px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            width: 100%; 
-            max-width: 450px; 
-        }
-        h2 { color: #2c3e50; text-align: center; margin-bottom: 25px; font-weight: 600; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; }
-        input, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            transition: 0.3s;
-        }
-        input:focus { border-color: #27ae60; outline: none; box-shadow: 0 0 5px rgba(39, 174, 96, 0.2); }
-        .btn-enviar { 
-            width: 100%; 
-            background-color: #27ae60; 
-            color: white; 
-            border: none; 
-            padding: 15px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 1.1rem; 
-            margin-top: 10px;
-            transition: 0.4s;
-        }
-        .btn-enviar:hover { background-color: #219150; transform: translateY(-2px); }
-        .nota { font-size: 13px; color: #7f8c8d; text-align: center; margin-top: 20px; line-height: 1.4; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { color: var(--primary); margin-top: 0; text-align: center; }
+        p { color: #666; text-align: center; font-size: 0.9rem; margin-bottom: 25px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--primary); font-size: 0.85rem; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .btn-enviar { width: 100%; padding: 15px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; }
+        .btn-enviar:hover { background: #219150; transform: translateY(-2px); }
+        .footer-links { text-align: center; margin-top: 20px; }
+        .footer-links a { color: var(--primary); text-decoration: none; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div class="form-registro">
-        <h2>Registro de Comercio</h2>
-        <form id="formSolicitud">
-            <div class="input-group">
-                <label>Nombre del Comercio</label>
-                <input type="text" id="reg-nombre" placeholder="Ej: Farmacia La Nueva" required>
-            </div>
-            
-            <div class="input-group">
-                <label>Correo Electrónico (Tu Usuario de Acceso)</label>
-                <input type="email" id="reg-usuario" placeholder="email@ejemplo.com" required>
-            </div>
-            
-            <div class="input-group">
-                <label>Contraseña</label>
-                <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" required>
-            </div>
+<div class="container">
+    <h2>Únete a Dónde Compro</h2>
+    <p>Completa tus datos para que los vecinos te encuentren. Tu solicitud será revisada por un administrador.</p>
+    
+    <form id="form-registro">
+        <label>Nombre del Comercio</label>
+        <input type="text" id="nombre" placeholder="Ej: Panadería El Sol" required>
 
-            <div class="input-group">
-                <label>WhatsApp de Contacto</label>
-                <input type="text" id="reg-whatsapp" placeholder="3456788789" required>
-            </div>
+        <label>Email (Este será tu Usuario)</label>
+        <input type="email" id="usuario" placeholder="correo@ejemplo.com" required>
 
-            <div class="input-group">
-                <label>Dirección</label>
-                <input type="text" id="reg-direccion" placeholder="Calle y número" required>
-            </div>
+        <label>Contraseña de Acceso</label>
+        <input type="password" id="pass" placeholder="Mínimo 6 caracteres" required>
 
-            <div class="input-group">
-                <label>Rubro</label>
-                <textarea id="reg-rubro" placeholder="Describe brevemente qué vendes..." rows="3"></textarea>
-            </div>
+        <label>WhatsApp de Contacto</label>
+        <input type="tel" id="whatsapp" placeholder="3876123456" required>
 
-            <button type="button" class="btn-enviar" id="btnAccion" onclick="enviarSolicitud()">SOLICITAR ALOJAMIENTO</button>
-        </form>
-        <p class="nota">Al enviar, tu solicitud quedará en estado <strong>Pendiente</strong> hasta que un administrador verifique y active tu cuenta.</p>
+        <label>Categoría</label>
+        <select id="categoria">
+            <option value="alimentos">Alimentos y Bebidas</option>
+            <option value="farmacia">Salud y Farmacia</option>
+            <option value="ferreteria">Hogar y Ferretería</option>
+            <option value="otros">Otros</option>
+        </select>
+
+        <button type="submit" class="btn-enviar">ENVIAR SOLICITUD</button>
+    </form>
+
+    <div class="footer-links">
+        <a href="index.html">← Volver al inicio</a>
     </div>
+</div>
 
-    <!-- Módulo de Firebase -->
-    <script type="module">
-        import { db } from './firebase-config.js';
-        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        window.enviarSolicitud = async () => {
-            const btn = document.getElementById('btnAccion');
-            
-            // Recolectamos los datos
-            const datos = {
-                nombre: document.getElementById('reg-nombre').value.trim(),
-                usuario: document.getElementById('reg-usuario').value.trim(), // CAMPO CRÍTICO
-                pass: document.getElementById('reg-pass').value.trim(),
-                whatsapp: document.getElementById('reg-whatsapp').value.trim(),
-                direccion: document.getElementById('reg-direccion').value.trim(),
-                rubro: document.getElementById('reg-rubro').value.trim(),
-                fecha: new Date().toLocaleString(),
-                estado: "pendiente"
-            };
+    document.getElementById('form-registro').onsubmit = async (e) => {
+        e.preventDefault();
 
-            // Validación básica
-            if(!datos.nombre || !datos.usuario || !datos.pass) {
-                alert("Por favor completa los campos principales.");
-                return;
-            }
+        const btn = e.target.querySelector('button');
+        btn.disabled = true;
+        btn.innerText = "Enviando...";
 
-            btn.disabled = true;
-            btn.innerText = "Enviando...";
-
-            try {
-                // Guardamos en la colección de solicitudes
-                await addDoc(collection(db, "solicitudes"), datos);
-                
-                alert("¡Éxito! Solicitud enviada correctamente. El administrador te activará pronto.");
-                document.getElementById('formSolicitud').reset();
-                window.location.href = "index.html"; 
-
-            } catch (error) {
-                console.error("Error Firebase:", error);
-                alert("Error al conectar con la base de datos. Verifica tu conexión.");
-                btn.disabled = false;
-                btn.innerText = "SOLICITAR ALOJAMIENTO";
-            }
+        const nuevaSolicitud = {
+            nombre: document.getElementById('nombre').value.trim(),
+            usuario: document.getElementById('usuario').value.trim().toLowerCase(), // Crucial para el login
+            pass: document.getElementById('pass').value.trim(),
+            whatsapp: document.getElementById('whatsapp').value.trim(),
+            categoria: document.getElementById('categoria').value,
+            estado: "pendiente",
+            fecha_registro: new Date().toISOString()
         };
-    </script>
+
+        try {
+            // Guardamos en la colección temporal de solicitudes
+            await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
+            alert("¡Solicitud enviada con éxito! Te avisaremos cuando el administrador la apruebe.");
+            window.location.href = "index.html";
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Hubo un problema al enviar la solicitud. Revisa tu conexión.");
+            btn.disabled = false;
+            btn.innerText = "ENVIAR SOLICITUD";
+        }
+    };
+</script>
+
 </body>
 </html>
