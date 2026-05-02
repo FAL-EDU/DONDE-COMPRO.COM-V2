@@ -3,96 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - DÓNDE COMPRO</title>
+    <title>Admin Panel - DÓNDE COMPRO</title>
     <style>
         :root { 
-            --primary: #2c3e50; 
-            --secondary: #27ae60; 
-            --danger: #e74c3c;
-            --light: #f4f7f6; 
+            --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #f4f7f6; 
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
         .container { max-width: 1100px; margin: auto; }
-        
-        header { 
-            background: white; padding: 15px 25px; border-radius: 12px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 25px; border-bottom: 4px solid var(--secondary);
-        }
-
-        .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+        header { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 4px solid var(--secondary); }
+        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        
-        h2 { font-size: 1.1rem; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; margin-bottom: 20px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.8rem; color: #666; text-transform: uppercase; }
+        h2 { font-size: 1.2rem; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.85rem; color: #666; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.8rem; }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-approve { background: var(--secondary); color: white; }
         .btn-delete { background: var(--danger); color: white; }
-        .btn-logout { background: #95a5a6; color: white; }
-
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
-        .no-data { color: var(--danger); font-weight: bold; font-style: italic; }
-
-        input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-
-        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
+        .no-data { color: #e74c3c; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h1>🛡️ Sistema de Gestión Local</h1>
-            <button class="btn btn-logout" onclick="cerrarSesion()">Salir</button>
+            <h1>🛡️ Panel de Administración</h1>
+            <button class="btn" style="background:#95a5a6; color:white;" onclick="cerrarSesion()">Salir</button>
         </header>
 
         <div class="grid">
-            <!-- CONFIGURACIÓN DE APARIENCIA -->
             <div class="card">
                 <h2>Diseño del Sitio</h2>
-                <div style="margin-bottom:15px;">
-                    <label style="font-size:0.8rem; color:#666;">URL LOGO PRINCIPAL</label>
-                    <input type="text" id="cfg-logo" placeholder="https://ejemplo.com/logo.png">
-                </div>
-                <div style="margin-bottom:15px;">
-                    <label style="font-size:0.8rem; color:#666;">URL IMAGEN DE FONDO</label>
-                    <input type="text" id="cfg-fondo" placeholder="https://ejemplo.com/fondo.jpg">
-                </div>
+                <input type="text" id="cfg-logo" placeholder="URL Logo" style="width:100%; padding:8px; margin-bottom:10px;">
+                <input type="text" id="cfg-fondo" placeholder="URL Fondo" style="width:100%; padding:8px; margin-bottom:15px;">
                 <button class="btn btn-approve" style="width:100%" onclick="guardarConfiguracion()">Actualizar Portada</button>
             </div>
 
-            <!-- GESTIÓN DE COMERCIOS -->
             <div class="main-content">
                 <div class="card">
-                    <h2>Nuevas Solicitudes de Registro</h2>
+                    <h2>Nuevas Solicitudes</h2>
                     <table>
                         <thead>
-                            <tr>
-                                <th>Comercio</th>
-                                <th>WhatsApp</th>
-                                <th>Email/Usuario</th>
-                                <th>Acción</th>
-                            </tr>
+                            <tr><th>Comercio</th><th>WhatsApp</th><th>Email</th><th>Acción</th></tr>
                         </thead>
                         <tbody id="lista-solicitudes"></tbody>
                     </table>
                 </div>
 
                 <div class="card">
-                    <h2>Comercios Activos en la Red</h2>
+                    <h2>Comercios Activados</h2>
                     <table>
                         <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Ubicación</th>
-                                <th>Usuario</th>
-                                <th>Acciones</th>
-                            </tr>
+                            <tr><th>Nombre</th><th>Ubicación</th><th>Usuario</th><th>Acciones</th></tr>
                         </thead>
                         <tbody id="lista-comercios"></tbody>
                     </table>
@@ -103,56 +66,56 @@
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, query, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Función Maestra: Normaliza cualquier campo de email a 'usuario'
-        const obtenerUsuarioValido = (data) => {
+        // Función para rescatar el usuario de cualquier campo posible
+        const rescatarEmail = (data) => {
             return data.usuario || data.email || data.correo || data.user || null;
         };
 
-        const cargarDatos = async () => {
-            // Cargar Solicitudes Pendientes
+        const cargarPanel = async () => {
             const snapSoli = await getDocs(collection(db, "solicitudes"));
             const listaSoli = document.getElementById('lista-solicitudes');
             listaSoli.innerHTML = "";
             snapSoli.forEach(d => {
                 const s = d.data();
-                const userEmail = obtenerUsuarioValido(s);
-                listaSoli.innerHTML += `
-                    <tr>
-                        <td><strong>${s.nombre || "S/N"}</strong></td>
-                        <td>${s.whatsapp || "-"}</td>
-                        <td>${userEmail ? `<span>${userEmail}</span>` : '<span class="no-data">Falta Correo</span>'}</td>
-                        <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Activar</button></td>
-                    </tr>`;
+                const u = rescatarEmail(s);
+                listaSoli.innerHTML += `<tr>
+                    <td>${s.nombre || "S/N"}</td>
+                    <td>${s.whatsapp || "-"}</td>
+                    <td>${u ? `<strong>${u}</strong>` : '<span class="no-data">Falta Correo</span>'}</td>
+                    <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Activar</button></td>
+                </tr>`;
             });
 
-            // Cargar Comercios Activados
             const snapCom = await getDocs(collection(db, "comercios"));
             const listaCom = document.getElementById('lista-comercios');
             listaCom.innerHTML = "";
             snapCom.forEach(d => {
                 const c = d.data();
-                const userEmail = obtenerUsuarioValido(c);
-                listaCom.innerHTML += `
-                    <tr>
-                        <td><strong>${c.nombre || "Comercio"}</strong></td>
-                        <td>${c.direccion || "Sin dirección"}</td>
-                        <td><span class="status-badge">${userEmail || "Sin Usuario"}</span></td>
-                        <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Eliminar</button></td>
-                    </tr>`;
+                const u = rescatarEmail(c);
+                listaCom.innerHTML += `<tr>
+                    <td><strong>${c.nombre || "Comercio"}</strong></td>
+                    <td>${c.direccion || "-"}</td>
+                    <td><span class="status-badge">${u || "Sin Usuario"}</span></td>
+                    <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Eliminar</button></td>
+                </tr>`;
             });
         };
 
-        // Lógica para Aprobar Comercio y Normalizar Datos
         window.activarComercio = async (id) => {
             const docRef = doc(db, "solicitudes", id);
             const snap = await getDoc(docRef);
             if (snap.exists()) {
                 const data = snap.data();
-                const emailFinal = obtenerUsuarioValido(data);
+                const emailFinal = rescatarEmail(data);
 
-                // Forzamos que se guarde como 'usuario' para evitar errores de login[cite: 3]
+                if(!emailFinal) {
+                    alert("Error: Esta solicitud no tiene un correo válido para crear el usuario.");
+                    return;
+                }
+
+                // NORMALIZACIÓN: Forzamos el campo 'usuario' para que el login funcione
                 await setDoc(doc(db, "comercios", id), {
                     ...data,
                     usuario: emailFinal, 
@@ -160,25 +123,20 @@
                     fechaActivacion: new Date().toISOString()
                 });
                 await deleteDoc(docRef);
-                alert("¡Comercio aprobado exitosamente!");
-                cargarDatos();
+                alert("¡Comercio activado con éxito!");
+                cargarPanel();
             }
         };
 
         window.eliminarComercio = async (id) => {
-            if(confirm("¿Estás seguro de que deseas dar de baja este comercio?")) {
+            if(confirm("¿Seguro que deseas eliminarlo?")) {
                 await deleteDoc(doc(db, "comercios", id));
-                cargarDatos();
+                cargarPanel();
             }
         };
 
-        window.cerrarSesion = () => { 
-            localStorage.clear(); 
-            window.location.href = 'login.html'; 
-        };
-        
-        // Ejecución inicial
-        cargarDatos();
+        window.cerrarSesion = () => { localStorage.clear(); window.location.href = 'login.html'; };
+        cargarPanel();
     </script>
 </body>
 </html>
