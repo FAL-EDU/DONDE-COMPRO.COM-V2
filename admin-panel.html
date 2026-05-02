@@ -3,137 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Dónde Compro</title>
+    <title>Master Admin - Dónde Compro</title>
     <style>
-        :root { --primary: #2c3e50; --danger: #e74c3c; --success: #27ae60; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
-        nav { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 30px; max-width: 1000px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; background: var(--bg); padding: 12px; color: var(--primary); }
+        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 250px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px; }
+        .sidebar h2 { font-size: 1.2rem; margin-bottom: 30px; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; }
+        .nav-link { color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; cursor: pointer; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background: var(--secondary); color: white; }
+
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 30px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; background: #f8f9fa; padding: 12px; color: var(--primary); }
         td { padding: 12px; border-bottom: 1px solid #eee; }
-        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
-        .btn-check { background: var(--success); color: white; }
-        .btn-del { background: var(--danger); color: white; margin-left: 5px; }
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; background: #f39c12; color: white; }
-        .logout { color: white; text-decoration: none; font-size: 0.9rem; border: 1px solid white; padding: 5px 10px; border-radius: 5px; }
+        
+        /* Modales */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--accent); color: white; margin-bottom: 15px; }
+        .btn-del { background: var(--danger); color: white; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<nav>
-    <strong>DONDE COMPRO - ADMIN</strong>
-    <a href="#" onclick="cerrarSesion()" class="logout">Cerrar Sesión</a>
-</nav>
-
-<div class="container">
-    <div class="card">
-        <h2>Solicitudes de Comercios Pendientes</h2>
-        <p>Aquí aparecen los comercios que se registraron y esperan tu aprobación para poder subir productos.</p>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Comercio</th>
-                    <th>Usuario (Email)</th>
-                    <th>WhatsApp</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="lista-solicitudes">
-                <!-- Los datos se cargan aquí automáticamente -->
-            </tbody>
-        </table>
+    <div class="sidebar">
+        <h2>ADMIN CONTROL</h2>
+        <div class="nav-link active" onclick="showSection('solicitudes')">📩 Solicitudes</div>
+        <div class="nav-link" onclick="showSection('comercios')">🏪 Comercios Activos</div>
+        <div class="nav-link" onclick="showSection('rubros')">🏷️ Gestionar Rubros</div>
+        <div class="nav-link" onclick="showSection('config')">⚙️ Configuración / Logo</div>
+        <div style="margin-top: auto;">
+            <button onclick="cerrarSesion()" class="btn btn-del" style="width: 100%;">Cerrar Sesión</button>
+        </div>
     </div>
-</div>
+
+    <div class="main-content">
+        
+        <!-- SECCIÓN SOLICITUDES (La que ya tenías) -->
+        <div id="solicitudes" class="section active">
+            <div class="card">
+                <h2>Solicitudes Pendientes</h2>
+                <table>
+                    <thead><tr><th>Comercio</th><th>Usuario</th><th>Acciones</th></tr></thead>
+                    <tbody id="lista-solicitudes"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECCIÓN COMERCIOS ACTIVOS -->
+        <div id="comercios" class="section">
+            <div class="card">
+                <h2>Comercios Activos por Rubro</h2>
+                <select id="filtro-rubro" onchange="cargarComerciosActivos()">
+                    <option value="todos">Todos los rubros</option>
+                </select>
+                <table>
+                    <thead><tr><th>Comercio</th><th>Rubro</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="lista-activos"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECCIÓN GESTIÓN DE RUBROS -->
+        <div id="rubros" class="section">
+            <div class="card">
+                <h2>Gestión de Rubros (Categorías)</h2>
+                <button class="btn btn-add" onclick="abrirModalRubro()">+ Nuevo Rubro</button>
+                <table>
+                    <thead><tr><th>Nombre del Rubro</th><th>Acciones</th></tr></thead>
+                    <tbody id="lista-rubros"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECCIÓN CONFIGURACIÓN -->
+        <div id="config" class="section">
+            <div class="card">
+                <h2>Personalización de la APP</h2>
+                <label>URL del Logo (Imagen)</label>
+                <input type="text" id="app-logo" placeholder="https://enlace-a-tu-imagen.png">
+                <button class="btn btn-add" onclick="guardarConfig()">Guardar Cambios</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL NUEVO RUBRO -->
+    <div id="modal-rubro" class="modal">
+        <div class="modal-content">
+            <h3>Añadir Nuevo Rubro</h3>
+            <input type="text" id="nuevo-rubro-nombre" placeholder="Nombre (ej: Veterinaria)">
+            <button class="btn btn-add" style="width: 100%;" onclick="guardarRubro()">GUARDAR RUBRO</button>
+            <button class="btn" style="width: 100%; background: none;" onclick="cerrarModalRubro()">Cancelar</button>
+        </div>
+    </div>
 
 <script type="module">
     import { db } from './firebase-config.js';
-    import { collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { collection, getDocs, doc, setDoc, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 1. Seguridad: Verificar si es admin
-    if (localStorage.getItem("sesion") !== "admin") {
-        window.location.href = "login.html";
-    }
+    // --- NAVEGACIÓN ---
+    window.showSection = (id) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(id === 'comercios') cargarComerciosActivos();
+        if(id === 'rubros') cargarRubros();
+    };
 
-    // 2. Función para cargar solicitudes
+    // --- GESTIÓN DE SOLICITUDES (Mejorado de image_89b0fd.png) ---
     const cargarSolicitudes = async () => {
+        const snap = await getDocs(collection(db, "solicitudes"));
         const lista = document.getElementById('lista-solicitudes');
-        lista.innerHTML = "<tr><td colspan='5'>Cargando solicitudes...</td></tr>";
-        
-        try {
-            const snap = await getDocs(collection(db, "solicitudes"));
-            lista.innerHTML = ""; // Limpiar
-
-            if (snap.empty) {
-                lista.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay solicitudes pendientes.</td></tr>";
-                return;
-            }
-
-            snap.forEach(d => {
-                const s = d.data();
-                lista.innerHTML += `
-                    <tr>
-                        <td><strong>${s.nombre}</strong></td>
-                        <td>${s.usuario}</td>
-                        <td>${s.whatsapp}</td>
-                        <td><span class="badge">PENDIENTE</span></td>
-                        <td>
-                            <button onclick="activarComercio('${d.id}')" class="btn btn-check">ACTIVAR</button>
-                            <button onclick="rechazarComercio('${d.id}')" class="btn btn-del">X</button>
-                        </td>
-                    </tr>`;
-            });
-        } catch (error) {
-            console.error("Error al cargar:", error);
-            lista.innerHTML = "<tr><td colspan='5' style='color:red;'>Error al conectar con Firebase.</td></tr>";
-        }
+        lista.innerHTML = "";
+        snap.forEach(d => {
+            const s = d.data();
+            lista.innerHTML += `<tr><td>${s.nombre}</td><td>${s.usuario}</td>
+                <td><button onclick="activar('${d.id}')" class="btn btn-add">Activar</button></td></tr>`;
+        });
     };
 
-    // 3. Función para Activar (Mover de 'solicitudes' a 'comercios')
-    window.activarComercio = async (id) => {
-        try {
-            const refSolicitud = doc(db, "solicitudes", id);
-            const snap = await getDoc(refSolicitud);
-
-            if (snap.exists()) {
-                const datos = snap.data();
-                // Lo guardamos en la colección definitiva[cite: 5]
-                await setDoc(doc(db, "comercios", id), {
-                    ...datos,
-                    estado: "activo",
-                    fecha_activacion: new Date().toISOString()
-                });
-                // Borramos la solicitud[cite: 5]
-                await deleteDoc(refSolicitud);
-                alert("¡Comercio activado con éxito! Ahora ya puede iniciar sesión.");
-                cargarSolicitudes();
-            }
-        } catch (e) {
-            alert("Error al activar");
-        }
-    };
-
-    // 4. Función para Rechazar
-    window.rechazarComercio = async (id) => {
-        if(confirm("¿Estás seguro de rechazar y borrar esta solicitud?")) {
-            await deleteDoc(doc(db, "solicitudes", id));
+    window.activar = async (id) => {
+        const ref = doc(db, "solicitudes", id);
+        const snap = await getDoc(ref);
+        if(snap.exists()){
+            await setDoc(doc(db, "comercios", id), { ...snap.data(), estado: "activo" }); //
+            await deleteDoc(ref); //
+            alert("Comercio activado");
             cargarSolicitudes();
         }
     };
 
-    window.cerrarSesion = () => {
-        localStorage.clear();
-        window.location.href = "login.html";
+    // --- GESTIÓN DE RUBROS ---
+    window.abrirModalRubro = () => document.getElementById('modal-rubro').style.display='flex';
+    window.cerrarModalRubro = () => document.getElementById('modal-rubro').style.display='none';
+
+    window.guardarRubro = async () => {
+        const nombre = document.getElementById('nuevo-rubro-nombre').value.trim();
+        if(!nombre) return;
+        await setDoc(doc(db, "rubros", nombre.toLowerCase()), { nombre: nombre });
+        cerrarModalRubro();
+        cargarRubros();
     };
 
-    // Iniciar carga
+    const cargarRubros = async () => {
+        const snap = await getDocs(collection(db, "rubros"));
+        const lista = document.getElementById('lista-rubros');
+        const filtro = document.getElementById('filtro-rubro');
+        lista.innerHTML = "";
+        filtro.innerHTML = '<option value="todos">Todos los rubros</option>';
+        
+        snap.forEach(d => {
+            lista.innerHTML += `<tr><td>${d.data().nombre}</td>
+                <td><button onclick="eliminarRubro('${d.id}')" class="btn btn-del">Eliminar</button></td></tr>`;
+            filtro.innerHTML += `<option value="${d.id}">${d.data().nombre}</option>`;
+        });
+    };
+
+    window.eliminarRubro = async (id) => {
+        if(confirm("¿Eliminar este rubro?")) {
+            await deleteDoc(doc(db, "rubros", id));
+            cargarRubros();
+        }
+    };
+
+    // --- COMERCIOS ACTIVOS ---
+    window.cargarComerciosActivos = async () => {
+        const rubroElegido = document.getElementById('filtro-rubro').value;
+        const snap = await getDocs(collection(db, "comercios"));
+        const lista = document.getElementById('lista-activos');
+        lista.innerHTML = "";
+        
+        snap.forEach(d => {
+            const c = d.data();
+            if(rubroElegido === 'todos' || c.categoria === rubroElegido) {
+                lista.innerHTML += `<tr><td>${c.nombre}</td><td>${c.categoria || 'Sin rubro'}</td>
+                    <td>Activo</td><td><button onclick="eliminarComercio('${d.id}')" class="btn btn-del">Baja</button></td></tr>`;
+            }
+        });
+    };
+
+    window.eliminarComercio = async (id) => {
+        if(confirm("¿Dar de baja a este comercio definitivamente?")) {
+            await deleteDoc(doc(db, "comercios", id));
+            cargarComerciosActivos();
+        }
+    };
+
+    // --- CONFIGURACIÓN ---
+    window.guardarConfig = async () => {
+        const logo = document.getElementById('app-logo').value;
+        await setDoc(doc(db, "configuracion", "general"), { logo: logo });
+        alert("Configuración guardada");
+    };
+
+    // Inicio
     cargarSolicitudes();
+    cargarRubros();
 
 </script>
-
 </body>
 </html>
