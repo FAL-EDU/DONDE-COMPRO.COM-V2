@@ -1,199 +1,42 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrativo - DÓNDE COMPRO</title>
-    <style>
-        :root { 
-            --primary: #2c3e50; 
-            --secondary: #27ae60; 
-            --danger: #e74c3c; 
-            --light: #f4f7f6; 
+<!-- ... (Estilos del admin-panel anteriores) ... -->
+<script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const cargarAdmin = async () => {
+        const snap = await getDocs(collection(db, "solicitudes"));
+        const lista = document.getElementById('lista-solicitudes');
+        lista.innerHTML = "";
+        snap.forEach(d => {
+            const s = d.data();
+            lista.innerHTML += `
+                <tr>
+                    <td>${s.nombre}</td>
+                    <td>${s.usuario}</td>
+                    <td>
+                        <button onclick="activar('${d.id}')" style="background:#27ae60; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Activar</button>
+                        <button onclick="rechazar('${d.id}')" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; margin-left:5px;">Rechazar</button>
+                    </td>
+                </tr>`;
+        });
+    };
+
+    window.activar = async (id) => {
+        const ref = doc(db, "solicitudes", id);
+        const snap = await getDoc(ref);
+        if(snap.exists()){
+            await setDoc(doc(db, "comercios", id), { ...snap.data(), estado: "activo" });
+            await deleteDoc(ref);
+            alert("Comercio activado");
+            cargarAdmin();
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: auto; }
-        header { 
-            background: white; padding: 15px 25px; border-radius: 12px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; 
-            justify-content: space-between; align-items: center; 
-            margin-bottom: 25px; border-bottom: 4px solid var(--secondary); 
+    };
+
+    window.rechazar = async (id) => {
+        if(confirm("¿Eliminar solicitud?")) {
+            await deleteDoc(doc(db, "solicitudes", id));
+            cargarAdmin();
         }
-        .grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { font-size: 1.1rem; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; margin-bottom: 20px; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.8rem; color: #666; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.75rem; color: white; }
-        .btn-approve { background: var(--secondary); }
-        .btn-approve:hover { background: #219150; }
-        .btn-reject { background: var(--danger); margin-left: 5px; }
-        .btn-reject:hover { background: #c0392b; }
-        
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .no-data { color: var(--danger); font-weight: bold; font-style: italic; font-size: 0.8rem; }
-        
-        input { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; background: #fdfdfd; }
-        label { font-size: 0.7rem; color: #7f8c8d; font-weight: bold; text-transform: uppercase; }
-
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <header>
-            <h1 style="font-size: 1.4rem; color: var(--primary); margin:0;">🛡️ Panel de Control Local</h1>
-            <button class="btn" style="background:#95a5a6;" onclick="cerrarSesion()">Salir</button>
-        </header>
-
-        <div class="grid">
-            <!-- PANEL DE APARIENCIA -->
-            <aside>
-                <div class="card">
-                    <h2>Apariencia del Sitio</h2>
-                    <div style="margin-bottom: 15px;">
-                        <label>URL LOGO</label>
-                        <input type="text" id="cfg-logo" placeholder="https://ejemplo.com/logo.png">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label>URL FONDO</label>
-                        <input type="text" id="cfg-fondo" placeholder="https://ejemplo.com/fondo.jpg">
-                    </div>
-                    <button class="btn btn-approve" style="width:100%;" onclick="guardarDiseno()">Guardar Diseño</button>
-                </div>
-            </aside>
-
-            <!-- GESTIÓN DE DATOS -->
-            <main>
-                <div class="card">
-                    <h2>Nuevas Solicitudes (Por Aprobar)</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Comercio</th>
-                                <th>WhatsApp</th>
-                                <th>Email Detectado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-solicitudes"></tbody>
-                    </table>
-                </div>
-
-                <div class="card">
-                    <h2>Comercios Activados en el Mapa</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Dirección / GPS</th>
-                                <th>Usuario (Login)</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-comercios"></tbody>
-                    </table>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <script type="module">
-        import { db } from './firebase-config.js';
-        import { collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Escanea campos para encontrar el correo
-        const detectarCorreo = (d) => d.usuario || d.email || d.correo || d.user || null;
-
-        const cargarPanel = async () => {
-            // Cargar Solicitudes
-            const snapSoli = await getDocs(collection(db, "solicitudes"));
-            const listaSoli = document.getElementById('lista-solicitudes');
-            listaSoli.innerHTML = "";
-            snapSoli.forEach(d => {
-                const s = d.data();
-                const u = detectarCorreo(s);
-                listaSoli.innerHTML += `
-                    <tr>
-                        <td><strong>${s.nombre || "Comercio Nuevo"}</strong></td>
-                        <td>${s.whatsapp || "-"}</td>
-                        <td>${u ? `<strong>${u}</strong>` : '<span class="no-data">No detectado</span>'}</td>
-                        <td>
-                            <button class="btn btn-approve" onclick="activarComercio('${d.id}')">Activar Ahora</button>
-                            <button class="btn btn-reject" onclick="rechazarSolicitud('${d.id}')">Rechazar</button>
-                        </td>
-                    </tr>`;
-            });
-
-            // Cargar Comercios
-            const snapCom = await getDocs(collection(db, "comercios"));
-            const listaCom = document.getElementById('lista-comercios');
-            listaCom.innerHTML = "";
-            snapCom.forEach(d => {
-                const c = d.data();
-                listaCom.innerHTML += `
-                    <tr>
-                        <td><strong>${c.nombre || "Comercio"}</strong></td>
-                        <td>${c.direccion || "Ubicación GPS"}</td>
-                        <td><span class="status-badge">${c.usuario || "Sin Usuario"}</span></td>
-                        <td><button class="btn btn-reject" onclick="eliminarComercio('${d.id}')">Dar de Baja</button></td>
-                    </tr>`;
-            });
-        };
-
-        window.activarComercio = async (id) => {
-            const docRef = doc(db, "solicitudes", id);
-            const snap = await getDoc(docRef);
-            if (snap.exists()) {
-                const data = snap.data();
-                let emailFinal = detectarCorreo(data);
-
-                if (!emailFinal) {
-                    emailFinal = prompt("El sistema no detectó el email automáticamente. Escríbelo para activar el acceso:", "ejemplo@correo.com");
-                }
-
-                if (emailFinal && emailFinal.includes("@")) {
-                    await setDoc(doc(db, "comercios", id), {
-                        ...data,
-                        usuario: emailFinal.toLowerCase().trim(),
-                        estado: "activo"
-                    });
-                    await deleteDoc(docRef);
-                    alert("¡Comercio activado con éxito!");
-                    cargarPanel();
-                } else {
-                    alert("Se requiere un correo válido para el login.");
-                }
-            }
-        };
-
-        window.rechazarSolicitud = async (id) => {
-            if (confirm("¿Estás seguro de RECHAZAR y ELIMINAR esta solicitud mal hecha?")) {
-                await deleteDoc(doc(db, "solicitudes", id));
-                cargarPanel();
-            }
-        };
-
-        window.eliminarComercio = async (id) => {
-            if (confirm("¿Dar de baja a este comercio del sistema?")) {
-                await deleteDoc(doc(db, "comercios", id));
-                cargarPanel();
-            }
-        };
-
-        window.guardarDiseno = () => {
-            localStorage.setItem('customLogo', document.getElementById('cfg-logo').value);
-            localStorage.setItem('customFondo', document.getElementById('cfg-fondo').value);
-            alert("Diseño guardado localmente para esta sesión.");
-        };
-
-        window.cerrarSesion = () => { window.location.href = 'login.html'; };
-
-        cargarPanel();
-    </script>
-</body>
-</html>
+    };
+    cargarAdmin();
+</script>
