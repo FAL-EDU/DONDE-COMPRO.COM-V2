@@ -2,176 +2,99 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrativo - DÓNDE COMPRO</title>
+    <title>Panel Administrativo - Pro</title>
     <style>
-        :root { 
-            --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #f4f7f6; 
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; }
-        header { 
-            background: white; padding: 15px 25px; border-radius: 12px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; 
-            justify-content: space-between; align-items: center; 
-            margin-bottom: 25px; border-bottom: 4px solid var(--secondary); 
-        }
-        .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { font-size: 1.1rem; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.8rem; color: #666; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.8rem; }
-        .btn-approve { background: var(--secondary); color: white; }
-        .btn-delete { background: var(--danger); color: white; }
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
-        .no-data { color: var(--danger); font-weight: bold; font-style: italic; }
-        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+        :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.8rem; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        .btn { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
+        .btn-act { background: var(--primary); }
+        .btn-del { background: var(--danger); margin-left: 5px; }
+        .no-mail { color: var(--danger); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>🛡️ Panel de Control - Administración</h1>
-            <button class="btn" style="background:#95a5a6; color:white;" onclick="cerrarSesion()">Salir</button>
-        </header>
+    <div class="card">
+        <h2>Solicitudes Pendientes</h2>
+        <table>
+            <thead>
+                <tr><th>Comercio</th><th>WhatsApp</th><th>Email Detectado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-solicitudes"></tbody>
+        </table>
+    </div>
 
-        <div class="grid">
-            <!-- CONFIGURACIÓN VISUAL -->
-            <div class="card">
-                <h2>Diseño del Sitio</h2>
-                <label style="font-size:0.7rem; color:#888;">URL LOGO</label>
-                <input type="text" id="cfg-logo">
-                <label style="font-size:0.7rem; color:#888; margin-top:10px; display:block;">URL FONDO</label>
-                <input type="text" id="cfg-fondo">
-                <button class="btn btn-approve" style="width:100%; margin-top:15px;" onclick="alert('Configuración guardada localmente')">Guardar Diseño</button>
-            </div>
-
-            <!-- TABLAS DE GESTIÓN -->
-            <div class="main-content">
-                <div class="card">
-                    <h2>Nuevas Solicitudes (Por Aprobar)</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Comercio</th>
-                                <th>WhatsApp</th>
-                                <th>Email Detectado</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-solicitudes"></tbody>
-                    </table>
-                </div>
-
-                <div class="card">
-                    <h2>Comercios Activados</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Dirección</th>
-                                <th>Usuario Acceso</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-comercios"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <div class="card">
+        <h2>Comercios Activos</h2>
+        <table>
+            <tbody id="tabla-activos"></tbody>
+        </table>
     </div>
 
     <script type="module">
         import { db } from './firebase-config.js';
         import { collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Función Maestra: Escanea todos los campos posibles buscando el correo
-        const detectarCorreo = (data) => {
-            return data.usuario || data.email || data.correo || data.user || null;
-        };
+        // Función para leer cualquier variante de email
+        const obtenerEmail = (d) => d.usuario || d.email || d.correo || null;
 
-        const cargarPanel = async () => {
-            // 1. Cargar Solicitudes Pendientes
-            const snapSoli = await getDocs(collection(db, "solicitudes"));
-            const listaSoli = document.getElementById('lista-solicitudes');
-            listaSoli.innerHTML = "";
-            snapSoli.forEach(d => {
-                const s = d.data();
-                const u = detectarCorreo(s);
-                listaSoli.innerHTML += `
-                    <tr>
-                        <td><strong>${s.nombre || "Sin Nombre"}</strong></td>
-                        <td>${s.whatsapp || "-"}</td>
-                        <td>${u ? `<strong>${u}</strong>` : '<span class="no-data">No detectado</span>'}</td>
-                        <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Activar Ahora</button></td>
-                    </tr>`;
-            });
+        const cargarDatos = async () => {
+            const solSnap = await getDocs(collection(db, "solicitudes"));
+            const resSoli = document.getElementById('tabla-solicitudes');
+            resSoli.innerHTML = "";
 
-            // 2. Cargar Comercios ya Activados[cite: 3]
-            const snapCom = await getDocs(collection(db, "comercios"));
-            const listaCom = document.getElementById('lista-comercios');
-            listaCom.innerHTML = "";
-            snapCom.forEach(d => {
-                const c = d.data();
-                const u = detectarCorreo(c);
-                listaCom.innerHTML += `
+            solSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                const email = obtenerEmail(data);
+                resSoli.innerHTML += `
                     <tr>
-                        <td><strong>${c.nombre || "Comercio"}</strong></td>
-                        <td>${c.direccion || "-"}</td>
-                        <td><span class="status-badge">${u || "Error de Usuario"}</span></td>
-                        <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Dar de Baja</button></td>
+                        <td>${data.nombre || 'S/N'}</td>
+                        <td>${data.whatsapp || '-'}</td>
+                        <td class="${!email ? 'no-mail' : ''}">${email || 'Falta Correo'}</td>
+                        <td>
+                            <button class="btn btn-act" onclick="activar('${docSnap.id}')">Activar</button>
+                            <button class="btn btn-del" onclick="rechazar('${docSnap.id}')">Eliminar</button>
+                        </td>
                     </tr>`;
             });
         };
 
-        // Función para Activar: Normaliza el correo y lo guarda como 'usuario'
-        window.activarComercio = async (id) => {
-            const docRef = doc(db, "solicitudes", id);
-            const snap = await getDoc(docRef);
-            
+        // Activa y UNIFICA el campo para que el login funcione
+        window.activar = async (id) => {
+            const ref = doc(db, "solicitudes", id);
+            const snap = await getDoc(ref);
             if (snap.exists()) {
                 const data = snap.data();
-                let emailFinal = detectarCorreo(data);
+                let email = obtenerEmail(data);
 
-                // Si el sistema no lo encuentra, te lo pregunta a ti[cite: 3]
-                if (!emailFinal) {
-                    emailFinal = prompt("El sistema no detectó el email automáticamente. Escríbelo aquí para activar el acceso del comercio:", "ejemplo@correo.com");
-                }
+                if (!email) email = prompt("Ingrese correo para este comercio:");
 
-                if (emailFinal && emailFinal.includes("@")) {
-                    // Guardamos siempre bajo la etiqueta 'usuario' para que el login funcione
+                if (email && email.includes('@')) {
                     await setDoc(doc(db, "comercios", id), {
                         ...data,
-                        usuario: emailFinal.toLowerCase().trim(),
-                        estado: "activo",
-                        fechaActivacion: new Date().toISOString()
+                        usuario: email.trim().toLowerCase(), // CAMPO CLAVE PARA LOGIN
+                        estado: "activo"
                     });
-                    await deleteDoc(docRef);
-                    alert("¡Comercio Activado Exitosamente!");
-                    cargarPanel();
-                } else {
-                    alert("No se puede activar un comercio sin un correo electrónico válido.");
+                    await deleteDoc(ref);
+                    alert("¡Activado!");
+                    cargarDatos();
                 }
             }
         };
 
-        window.eliminarComercio = async (id) => {
-            if(confirm("¿Estás seguro de que deseas eliminar este comercio de la red?")) {
-                await deleteDoc(doc(db, "comercios", id));
-                cargarPanel();
+        // Elimina solicitudes malas o duplicadas
+        window.rechazar = async (id) => {
+            if (confirm("¿Eliminar esta solicitud definitivamente?")) {
+                await deleteDoc(doc(db, "solicitudes", id));
+                cargarDatos();
             }
         };
 
-        window.cerrarSesion = () => { 
-            localStorage.clear(); 
-            window.location.href = 'login.html'; 
-        };
-        
-        cargarPanel();
+        cargarDatos();
     </script>
 </body>
 </html>
