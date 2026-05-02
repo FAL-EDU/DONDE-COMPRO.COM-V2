@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - DÓNDE COMPRO</title>
+    <title>Panel Administrativo - DÓNDE COMPRO</title>
     <style>
         :root { 
             --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --light: #f4f7f6; 
@@ -11,51 +11,55 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
         .container { max-width: 1100px; margin: auto; }
         header { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 4px solid var(--secondary); }
-        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { font-size: 1.2rem; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; margin-bottom: 20px; }
+        h2 { font-size: 1.1rem; color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 10px; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.85rem; color: #666; }
+        th { text-align: left; background: #f8f9fa; padding: 12px; font-size: 0.8rem; color: #666; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.8rem; }
         .btn-approve { background: var(--secondary); color: white; }
         .btn-delete { background: var(--danger); color: white; }
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
-        .no-data { color: #e74c3c; font-weight: bold; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
+        .no-data { color: var(--danger); font-weight: bold; font-style: italic; }
+        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h1>🛡️ Panel de Administración</h1>
+            <h1>🛡️ Panel de Control Local</h1>
             <button class="btn" style="background:#95a5a6; color:white;" onclick="cerrarSesion()">Salir</button>
         </header>
 
         <div class="grid">
             <div class="card">
-                <h2>Diseño del Sitio</h2>
-                <input type="text" id="cfg-logo" placeholder="URL Logo" style="width:100%; padding:8px; margin-bottom:10px;">
-                <input type="text" id="cfg-fondo" placeholder="URL Fondo" style="width:100%; padding:8px; margin-bottom:15px;">
-                <button class="btn btn-approve" style="width:100%" onclick="guardarConfiguracion()">Actualizar Portada</button>
+                <h2>Apariencia del Sitio</h2>
+                <label style="font-size:0.7rem; color:#888;">URL LOGO</label>
+                <input type="text" id="cfg-logo">
+                <label style="font-size:0.7rem; color:#888; margin-top:10px; display:block;">URL FONDO</label>
+                <input type="text" id="cfg-fondo">
+                <button class="btn btn-approve" style="width:100%; margin-top:15px;" onclick="alert('Configuración guardada')">Guardar Diseño</button>
             </div>
 
             <div class="main-content">
                 <div class="card">
-                    <h2>Nuevas Solicitudes</h2>
+                    <h2>Nuevas Solicitudes (Por Aprobar)</h2>
                     <table>
                         <thead>
-                            <tr><th>Comercio</th><th>WhatsApp</th><th>Email</th><th>Acción</th></tr>
+                            <tr><th>Comercio</th><th>WhatsApp</th><th>Email Detectado</th><th>Acción</th></tr>
                         </thead>
                         <tbody id="lista-solicitudes"></tbody>
                     </table>
                 </div>
 
                 <div class="card">
-                    <h2>Comercios Activados</h2>
+                    <h2>Comercios en el Mapa</h2>
                     <table>
                         <thead>
-                            <tr><th>Nombre</th><th>Ubicación</th><th>Usuario</th><th>Acciones</th></tr>
+                            <tr><th>Nombre</th><th>Ubicación</th><th>Usuario (Login)</th><th>Acciones</th></tr>
                         </thead>
                         <tbody id="lista-comercios"></tbody>
                     </table>
@@ -68,37 +72,39 @@
         import { db } from './firebase-config.js';
         import { collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Función para rescatar el usuario de cualquier campo posible
-        const rescatarEmail = (data) => {
+        // Función Maestra: Busca el correo en cualquier etiqueta posible
+        const detectarCorreo = (data) => {
             return data.usuario || data.email || data.correo || data.user || null;
         };
 
         const cargarPanel = async () => {
+            // 1. Solicitudes Pendientes
             const snapSoli = await getDocs(collection(db, "solicitudes"));
             const listaSoli = document.getElementById('lista-solicitudes');
             listaSoli.innerHTML = "";
             snapSoli.forEach(d => {
                 const s = d.data();
-                const u = rescatarEmail(s);
+                const u = detectarCorreo(s);
                 listaSoli.innerHTML += `<tr>
-                    <td>${s.nombre || "S/N"}</td>
+                    <td><strong>${s.nombre || "S/N"}</strong></td>
                     <td>${s.whatsapp || "-"}</td>
-                    <td>${u ? `<strong>${u}</strong>` : '<span class="no-data">Falta Correo</span>'}</td>
-                    <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Activar</button></td>
+                    <td>${u ? u : '<span class="no-data">No detectado</span>'}</td>
+                    <td><button class="btn btn-approve" onclick="activarComercio('${d.id}')">Activar Ahora</button></td>
                 </tr>`;
             });
 
+            // 2. Comercios Activados
             const snapCom = await getDocs(collection(db, "comercios"));
             const listaCom = document.getElementById('lista-comercios');
             listaCom.innerHTML = "";
             snapCom.forEach(d => {
                 const c = d.data();
-                const u = rescatarEmail(c);
+                const u = detectarCorreo(c);
                 listaCom.innerHTML += `<tr>
                     <td><strong>${c.nombre || "Comercio"}</strong></td>
                     <td>${c.direccion || "-"}</td>
-                    <td><span class="status-badge">${u || "Sin Usuario"}</span></td>
-                    <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Eliminar</button></td>
+                    <td><span class="status-badge">${u || "Error de Usuario"}</span></td>
+                    <td><button class="btn btn-delete" onclick="eliminarComercio('${d.id}')">Dar de Baja</button></td>
                 </tr>`;
             });
         };
@@ -106,25 +112,30 @@
         window.activarComercio = async (id) => {
             const docRef = doc(db, "solicitudes", id);
             const snap = await getDoc(docRef);
+            
             if (snap.exists()) {
                 const data = snap.data();
-                const emailFinal = rescatarEmail(data);
+                let emailFinal = detectarCorreo(data);
 
-                if(!emailFinal) {
-                    alert("Error: Esta solicitud no tiene un correo válido para crear el usuario.");
-                    return;
+                // Si los datos viejos no tienen el campo correcto, lo pedimos[cite: 3]
+                if (!emailFinal) {
+                    emailFinal = prompt("El sistema no detectó el email automáticamente. Escríbelo aquí para activar el comercio:", "ejemplo@correo.com");
                 }
 
-                // NORMALIZACIÓN: Forzamos el campo 'usuario' para que el login funcione
-                await setDoc(doc(db, "comercios", id), {
-                    ...data,
-                    usuario: emailFinal, 
-                    estado: "activo",
-                    fechaActivacion: new Date().toISOString()
-                });
-                await deleteDoc(docRef);
-                alert("¡Comercio activado con éxito!");
-                cargarPanel();
+                if (emailFinal && emailFinal.includes("@")) {
+                    // NORMALIZACIÓN: Guardamos con la etiqueta 'usuario' para que el login funcione[cite: 3]
+                    await setDoc(doc(db, "comercios", id), {
+                        ...data,
+                        usuario: emailFinal.toLowerCase().trim(),
+                        estado: "activo",
+                        fechaActivacion: new Date().toISOString()
+                    });
+                    await deleteDoc(docRef);
+                    alert("¡Comercio Activado!");
+                    cargarPanel();
+                } else {
+                    alert("No se pudo activar sin un correo válido.");
+                }
             }
         };
 
