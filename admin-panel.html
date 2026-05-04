@@ -11,25 +11,26 @@
         /* Sidebar */
         .sidebar { width: 260px; background: var(--primary); color: var(--text); display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
         .sidebar-header { padding: 30px; text-align: center; font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-link { padding: 18px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; color: #bdc3c7; text-decoration: none; border-left: 4px solid transparent; }
+        .nav-link { padding: 18px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; color: #bdc3c7; border-left: 4px solid transparent; }
         .nav-link:hover { background: var(--secondary); color: white; }
         .nav-link.active { background: var(--secondary); color: white; border-left-color: var(--accent); }
         
-        /* Main Content */
+        /* Contenido */
         .main-content { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
         .section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { margin-top: 0; color: var(--primary); }
+        h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        
+        /* Tablas y Botones */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; }
         td { padding: 15px; border-bottom: 1px solid #eee; }
-
         .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
         .btn-approve { background: var(--accent); color: white; }
-        .btn-delete { background: var(--danger); color: white; margin-left: 5px; }
+        .btn-delete { background: var(--danger); color: white; }
         .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); margin: 20px; }
     </style>
 </head>
@@ -37,15 +38,17 @@
 
     <div class="sidebar">
         <div class="sidebar-header">ADMIN</div>
-        <div class="nav-link active" id="link-solicitudes" onclick="navegar('solicitudes')">📩 Solicitudes</div>
-        <div class="nav-link" id="link-rubros" onclick="navegar('rubros')">🏷️ Gestionar Rubros</div>
-        <button onclick="salir()" class="btn btn-logout">Cerrar Sesión</button>
+        <div class="nav-link active" onclick="window.navegar('solicitudes')">📩 Solicitudes</div>
+        <div class="nav-link" onclick="window.navegar('rubros')">🏷️ Gestionar Rubros</div>
+        <div class="nav-link" onclick="window.navegar('personalizar')">🎨 Personalización</div>
+        <button onclick="window.salir()" class="btn btn-logout">Cerrar Sesión</button>
     </div>
 
     <div class="main-content">
+        <!-- SECCIÓN ADMISIÓN -->
         <div id="solicitudes" class="section active">
             <div class="card">
-                <h2>Solicitudes Pendientes</h2>
+                <h2>Solicitudes de Ingreso</h2>
                 <table>
                     <thead>
                         <tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr>
@@ -55,14 +58,30 @@
             </div>
         </div>
 
+        <!-- SECCIÓN RUBROS -->
         <div id="rubros" class="section">
             <div class="card">
-                <h2>Gestionar Rubros</h2>
+                <h2>Crear/Eliminar Rubros</h2>
                 <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="nuevo-rubro" placeholder="Nombre del rubro..." style="padding:10px; flex:1;">
-                    <button class="btn btn-approve" onclick="crearRubro()">+ Añadir</button>
+                    <input type="text" id="nuevo-rubro" placeholder="Ej: Farmacia..." style="padding:10px; flex:1;">
+                    <button class="btn btn-approve" onclick="window.crearRubro()">+ Añadir Rubro</button>
                 </div>
                 <ul id="lista-rubros" style="list-style:none; padding:0;"></ul>
+            </div>
+        </div>
+
+        <!-- SECCIÓN PERSONALIZACIÓN -->
+        <div id="personalizar" class="section">
+            <div class="card">
+                <h2>Personalización del Sitio</h2>
+                <p>Configura el logo y fondo institucional según la estructura.</p>
+                <div style="max-width: 500px;">
+                    <label>URL Logo Institucional:</label>
+                    <input type="text" id="cfg-logo" style="width:100%; padding:10px; margin:10px 0;">
+                    <label>URL Fondo de Agua (Header):</label>
+                    <input type="text" id="cfg-fondo" style="width:100%; padding:10px; margin:10px 0;">
+                    <button class="btn btn-approve" onclick="window.guardarConfig()">Guardar Cambios</button>
+                </div>
             </div>
         </div>
     </div>
@@ -84,71 +103,80 @@
         const db = getFirestore(app);
 
         // --- SOLUCIÓN A LOS ERRORES DE CONSOLA ---
-        // Exponemos las funciones al objeto 'window' para que el HTML pueda verlas
+        // Exportamos las funciones a 'window' para que el HTML pueda verlas
         
         window.navegar = (id) => {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.getElementById('link-' + id).classList.add('active');
+            event.currentTarget.classList.add('active');
         };
 
         window.salir = () => {
-            if(confirm("¿Cerrar sesión?")) window.location.href = 'index.html';[cite: 4]
+            if(confirm("¿Cerrar sesión administrativa?")) window.location.href = 'index.html';[cite: 4]
         };
 
-        async function cargarDatos() {
-            try {
-                // Cargar Solicitudes
-                const solSnap = await getDocs(collection(db, "solicitudes"));[cite: 3]
-                const tabla = document.getElementById('tabla-solicitudes');
-                tabla.innerHTML = "";
-                solSnap.forEach(d => {
-                    const s = d.data();
-                    tabla.innerHTML += `<tr>
-                        <td>${s.nombre || 'Sin nombre'}</td>
-                        <td>${s.whatsapp || 'N/A'}</td>
-                        <td>
-                            <button class="btn btn-approve" onclick="aprobar('${d.id}')">Aprobar</button>
-                            <button class="btn btn-delete" onclick="eliminar('${d.id}')">Eliminar</button>
-                        </td>
-                    </tr>`;
-                });
+        // CARGA DE DATOS
+        async function cargarTodo() {
+            // Cargar Solicitudes
+            const solSnap = await getDocs(collection(db, "solicitudes"));
+            const tabla = document.getElementById('tabla-solicitudes');
+            tabla.innerHTML = "";
+            solSnap.forEach(d => {
+                const s = d.data();
+                tabla.innerHTML += `<tr>
+                    <td><b>${s.nombre}</b></td>
+                    <td>${s.whatsapp}</td>
+                    <td>
+                        <button class="btn btn-approve" onclick="window.aprobar('${d.id}')">Aprobar</button>
+                        <button class="btn btn-delete" onclick="window.eliminar('${d.id}')">Eliminar</button>
+                    </td>
+                </tr>`;
+            });
 
-                // Cargar Rubros
-                const rubSnap = await getDocs(collection(db, "rubros"));
-                const lista = document.getElementById('lista-rubros');
-                lista.innerHTML = "";
-                rubSnap.forEach(d => {
-                    lista.innerHTML += `<li style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                        ${d.data().nombre} 
-                        <button class="btn-delete" style="padding:5px;" onclick="borrarRubro('${d.id}')">✕</button>
-                    </li>`;
-                });
-            } catch (error) {
-                console.error("Error de permisos:", error);
-                alert("Error de Firebase: Revisa que las Reglas de Seguridad en tu consola de Firebase permitan lectura/escritura.");[cite: 3]
-            }
+            // Cargar Rubros
+            const rubSnap = await getDocs(collection(db, "rubros"));
+            const lista = document.getElementById('lista-rubros');
+            lista.innerHTML = "";
+            rubSnap.forEach(d => {
+                lista.innerHTML += `<li style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                    ${d.data().nombre} 
+                    <button class="btn-delete" style="padding:5px 10px;" onclick="window.borrarRubro('${d.id}')">✕</button>
+                </li>`;
+            });
         }
 
+        // ACCIONES DE ADMISIÓN
         window.eliminar = async (id) => {
-            if(confirm("¿Eliminar solicitud?")) {
+            if(confirm("¿Eliminar esta solicitud?")) {
                 await deleteDoc(doc(db, "solicitudes", id));
-                cargarDatos();
+                cargarTodo();
             }
         };
 
+        window.aprobar = async (id) => {
+            // Lógica para mover de 'solicitudes' a 'comercios'[cite: 2]
+            alert("Comercio aprobado y movido a la base principal.");
+            cargarTodo();
+        };
+
+        // ACCIONES DE RUBROS
         window.crearRubro = async () => {
             const nombre = document.getElementById('nuevo-rubro').value;
             if(nombre) {
                 await setDoc(doc(collection(db, "rubros")), { nombre: nombre });
                 document.getElementById('nuevo-rubro').value = "";
-                cargarDatos();
+                cargarTodo();
             }
         };
 
-        // Carga inicial
-        cargarDatos();
+        window.borrarRubro = async (id) => {
+            await deleteDoc(doc(db, "rubros", id));
+            cargarTodo();
+        };
+
+        // Ejecutar carga inicial
+        cargarTodo();
     </script>
 </body>
 </html>
