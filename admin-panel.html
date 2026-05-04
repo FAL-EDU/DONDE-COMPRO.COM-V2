@@ -7,195 +7,160 @@
     <style>
         :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* Sidebar */
         .sidebar { width: 250px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px; }
         .sidebar h2 { font-size: 1.2rem; margin-bottom: 30px; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; }
         .nav-link { color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; cursor: pointer; transition: 0.3s; }
         .nav-link:hover, .nav-link.active { background: var(--secondary); color: white; }
-
-        /* Main Content */
         .main-content { flex: 1; overflow-y: auto; padding: 30px; }
         .section { display: none; }
         .section.active { display: block; }
-        
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { text-align: left; background: #f8f9fa; padding: 12px; color: var(--primary); }
         td { padding: 12px; border-bottom: 1px solid #eee; }
-        
-        /* Modales */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
-        
         .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-add { background: var(--accent); color: white; margin-bottom: 15px; }
         .btn-del { background: var(--danger); color: white; }
         input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
     </style>
+
+    <script>
+        /* NAVEGACIÓN GLOBAL - Funciona incluso si Firebase falla */
+        window.showSection = function(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const target = document.getElementById(id);
+            if(target) target.classList.add('active');
+            if(event && event.currentTarget) event.currentTarget.classList.add('active');
+        };
+
+        window.cerrarSesion = function() {
+            if(confirm("¿Seguro que deseas salir?")) {
+                window.location.href = "index.html";[cite: 4]
+            }
+        };
+
+        window.abrirModalRubro = () => document.getElementById('modal-rubro').style.display='flex';
+        window.cerrarModalRubro = () => document.getElementById('modal-rubro').style.display='none';
+    </script>
 </head>
 <body>
 
     <div class="sidebar">
         <h2>ADMIN CONTROL</h2>
-        <div class="nav-link active" onclick="window.showSection('solicitudes')">📩 Solicitudes</div>
-        <div class="nav-link" onclick="window.showSection('comercios')">🏪 Comercios Activos</div>
-        <div class="nav-link" onclick="window.showSection('rubros')">🏷️ Gestionar Rubros</div>
-        <div class="nav-link" onclick="window.showSection('config')">⚙️ Configuración / Logo</div>
+        <div class="nav-link active" onclick="showSection('solicitudes')">📩 Solicitudes</div>
+        <div class="nav-link" onclick="showSection('comercios')">🏪 Comercios Activos</div>
+        <div class="nav-link" onclick="showSection('rubros')">🏷️ Gestionar Rubros</div>
+        <div class="nav-link" onclick="showSection('config')">⚙️ Configuración / Logo</div>
         <div style="margin-top: auto;">
-            <!-- FUNCIONALIDAD: Cerrar Sesión -->
-            <button onclick="window.cerrarSesion()" class="btn btn-del" style="width: 100%;">Cerrar Sesión</button>
+            <button onclick="cerrarSesion()" class="btn btn-del" style="width: 100%;">Cerrar Sesión</button>
         </div>
     </div>
 
     <div class="main-content">
-        
+        <!-- SECCIÓN SOLICITUDES -->
         <div id="solicitudes" class="section active">
             <div class="card">
                 <h2>Solicitudes Pendientes</h2>
                 <table>
                     <thead><tr><th>Comercio</th><th>Usuario</th><th>Acciones</th></tr></thead>
-                    <tbody id="lista-solicitudes"></tbody>
+                    <tbody id="lista-solicitudes"><tr><td colspan="3">Cargando...</td></tr></tbody>
                 </table>
             </div>
         </div>
 
-        <div id="comercios" class="section">
-            <div class="card">
-                <h2>Comercios Activos por Rubro</h2>
-                <select id="filtro-rubro" onchange="window.cargarComerciosActivos()">
-                    <option value="todos">Todos los rubros</option>
-                </select>
-                <table>
-                    <thead><tr><th>Comercio</th><th>Rubro</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody id="lista-activos"></tbody>
-                </table>
-            </div>
-        </div>
-
+        <!-- SECCIÓN RUBROS -->
         <div id="rubros" class="section">
             <div class="card">
-                <h2>Gestión de Rubros (Categorías)</h2>
-                <button class="btn btn-add" onclick="window.abrirModalRubro()">+ Nuevo Rubro</button>
-                <table>
-                    <thead><tr><th>Nombre del Rubro</th><th>Acciones</th></tr></thead>
+                <h2>Gestión de Rubros</h2>
+                <button class="btn btn-add" onclick="abrirModalRubro()">+ Nuevo Rubro</button>
+                <table id="tabla-rubros">
+                    <thead><tr><th>Nombre</th><th>Acciones</th></tr></thead>
                     <tbody id="lista-rubros"></tbody>
                 </table>
             </div>
         </div>
 
+        <!-- SECCIÓN CONFIGURACIÓN -->
         <div id="config" class="section">
             <div class="card">
                 <h2>Personalización de la APP</h2>
-                <label>URL del Logo (Imagen PNG/JPG)</label>
+                <label>URL del Logo</label>
                 <input type="text" id="app-logo" placeholder="https://ejemplo.com/logo.png">
-                
-                <!-- NUEVO CAMPO: Fondo de Agua -->
                 <label>URL Imagen Fondo de Agua (FrontPage)</label>
                 <input type="text" id="app-watermark" placeholder="https://ejemplo.com/fondo.jpg">
-                
                 <button class="btn btn-add" onclick="window.guardarConfig()">Guardar Cambios</button>
             </div>
         </div>
-
     </div>
 
-    <!-- MODAL NUEVO RUBRO -->
     <div id="modal-rubro" class="modal">
         <div class="modal-content">
             <h3>Añadir Nuevo Rubro</h3>
-            <input type="text" id="nuevo-rubro-nombre" placeholder="Nombre (ej: Veterinaria)">
-            <!-- FUNCIONALIDAD: Guardar Rubro -->
+            <input type="text" id="nuevo-rubro-nombre" placeholder="Ej: Veterinaria">
             <button class="btn btn-add" style="width: 100%;" onclick="window.guardarRubro()">GUARDAR RUBRO</button>
-            <button class="btn" style="width: 100%; background: none;" onclick="window.cerrarModalRubro()">Cancelar</button>
+            <button class="btn" style="width: 100%; background: none;" onclick="cerrarModalRubro()">Cancelar</button>
         </div>
     </div>
 
 <script type="module">
-    // Importamos Firebase directamente para que funcione en un solo archivo
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    /* CONFIGURACIÓN - REVISA BIEN LAS COMILLAS Y DOS PUNTOS AQUÍ */
     const firebaseConfig = {
-        // Asegúrate de usar tus credenciales reales aquí
-        apiKey: "TU_API_KEY",
-        authDomain: "TU_PROYECTO.firebaseapp.com",
-        projectId: "TU_PROYECTO_ID",
-        storageBucket: "TU_PROYECTO.appspot.com",
-        messagingSenderId: "ID",
-        appId: "APP_ID"
+        apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
+        authDomain: "donde-compro-oficial.firebaseapp.com",
+        projectId: "donde-compro-oficial",
+        storageBucket: "donde-compro-oficial.firebasestorage.app",
+        messagingSenderId: "113447539181",
+        appId: "1:113447539181:web:6d91fc4fe96bb83d82d7e4"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- EXPOSICIÓN GLOBAL DE FUNCIONES (Para que los botones funcionen)[cite: 3] ---
-    
-    window.showSection = (id) => {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'comercios') window.cargarComerciosActivos();
-        if(id === 'rubros') window.cargarRubros();
-    };
-
-    window.cerrarSesion = () => {
-        if(confirm("¿Seguro que deseas salir?")) {
-            window.location.href = "index.html";[cite: 4]
-        }
-    };
-
+    /* FUNCIONES DE FIREBASE ASIGNADAS A WINDOW */
     window.guardarRubro = async () => {
         const nombre = document.getElementById('nuevo-rubro-nombre').value.trim();
-        if(!nombre) return alert("Ingresa un nombre");
+        if(!nombre) return;
         try {
             await setDoc(doc(db, "rubros", nombre.toLowerCase()), { nombre: nombre });[cite: 3]
-            alert("Rubro guardado con éxito");
-            window.cerrarModalRubro();
             document.getElementById('nuevo-rubro-nombre').value = "";
-            window.cargarRubros();
-        } catch (e) { console.error(e); }
+            window.cerrarModalRubro();
+            alert("Rubro guardado!");
+            cargarDatos();
+        } catch (e) { alert("Error al guardar: " + e.message); }
     };
-
-    window.cargarRubros = async () => {
-        const snap = await getDocs(collection(db, "rubros"));
-        const lista = document.getElementById('lista-rubros');
-        const filtro = document.getElementById('filtro-rubro');
-        lista.innerHTML = "";
-        filtro.innerHTML = '<option value="todos">Todos los rubros</option>';
-        
-        snap.forEach(d => {
-            const data = d.data();
-            lista.innerHTML += `<tr><td>${data.nombre}</td>
-                <td><button onclick="window.eliminarRubro('${d.id}')" class="btn btn-del">Eliminar</button></td></tr>`;
-            filtro.innerHTML += `<option value="${d.id}">${data.nombre}</option>`;
-        });
-    };
-
-    window.eliminarRubro = async (id) => {
-        if(confirm("¿Eliminar este rubro?")) {
-            await deleteDoc(doc(db, "rubros", id));
-            window.cargarRubros();
-        }
-    };
-
-    window.abrirModalRubro = () => document.getElementById('modal-rubro').style.display='flex';
-    window.cerrarModalRubro = () => document.getElementById('modal-rubro').style.display='none';
 
     window.guardarConfig = async () => {
         const logo = document.getElementById('app-logo').value;
         const watermark = document.getElementById('app-watermark').value;
-        await setDoc(doc(db, "configuracion", "general"), { 
-            logo: logo,
-            watermark: watermark 
-        });[cite: 2]
-        alert("Configuración y Fondo de Agua guardados");
+        try {
+            await setDoc(doc(db, "configuracion", "general"), { logo, watermark });[cite: 2, 3]
+            alert("Configuración actualizada.");
+        } catch (e) { alert("Error: " + e.message); }
     };
 
-    // Inicialización automática
-    window.cargarRubros();
-    // (Otras funciones de carga igual...)
+    const cargarDatos = async () => {
+        const snap = await getDocs(collection(db, "rubros"));[cite: 3]
+        const lista = document.getElementById('lista-rubros');
+        lista.innerHTML = "";
+        snap.forEach(d => {
+            lista.innerHTML += `<tr><td>${d.data().nombre}</td><td><button onclick="window.eliminarRubro('${d.id}')" class="btn btn-del">Eliminar</button></td></tr>`;
+        });
+    };
 
+    window.eliminarRubro = async (id) => {
+        if(confirm("¿Eliminar?")) {
+            await deleteDoc(doc(db, "rubros", id));[cite: 3]
+            cargarDatos();
+        }
+    };
+
+    cargarDatos();
 </script>
 </body>
 </html>
