@@ -6,16 +6,15 @@
     <title>Panel Administrativo - Dónde Compro</title>
     <style>
         :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; --text: #ffffff; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; }
         
         /* Sidebar */
-        .sidebar { width: 260px; background: var(--primary); color: var(--text); display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .sidebar { width: 260px; background: var(--primary); color: var(--text); display: flex; flex-direction: column; }
         .sidebar-header { padding: 30px; text-align: center; font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-link { padding: 18px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; color: #bdc3c7; border-left: 4px solid transparent; }
-        .nav-link:hover { background: var(--secondary); color: white; }
-        .nav-link.active { background: var(--secondary); color: white; border-left-color: var(--accent); }
+        .nav-link { padding: 18px 25px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; color: #bdc3c7; }
+        .nav-link:hover, .nav-link.active { background: var(--secondary); color: white; border-left-color: var(--accent); }
         
-        /* Contenido */
+        /* Contenido Principal */
         .main-content { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
         .section.active { display: block; animation: fadeIn 0.3s ease; }
@@ -27,6 +26,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; }
         td { padding: 15px; border-bottom: 1px solid #eee; }
+        
         .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
         .btn-approve { background: var(--accent); color: white; }
         .btn-delete { background: var(--danger); color: white; }
@@ -34,24 +34,20 @@
     </style>
 
     <script>
-        // SOLUCIÓN CLAVE: Declaramos las funciones de navegación ANTES de que cargue Firebase
-        // Esto evita el error "is not a function"
-        window.navegar = function(id) {
-            const sections = document.querySelectorAll('.section');
-            const links = document.querySelectorAll('.nav-link');
+        // Lógica de navegación inmediata (Fuera del módulo para evitar errores)
+        window.navegar = function(id, elemento) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            // Quitar clase active de todos los links
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             
-            sections.forEach(s => s.classList.remove('active'));
-            links.forEach(l => l.classList.remove('active'));
-            
-            const targetSection = document.getElementById(id);
-            if (targetSection) targetSection.classList.add('active');
-            
-            // Iluminar el botón correcto en la sidebar
-            if (event && event.currentTarget) event.currentTarget.classList.add('active');
+            // Mostrar la seleccionada
+            document.getElementById(id).classList.add('active');
+            elemento.classList.add('active');
         };
 
         window.salir = function() {
-            if(confirm("¿Cerrar sesión administrativa?")) {
+            if(confirm("¿Deseas cerrar la sesión administrativa?")) {
                 window.location.href = 'index.html';[cite: 4]
             }
         };
@@ -61,57 +57,56 @@
 
     <div class="sidebar">
         <div class="sidebar-header">ADMIN</div>
-        <div class="nav-link active" onclick="navegar('solicitudes')">📩 Solicitudes</div>
-        <div class="nav-link" onclick="navegar('rubros')">🏷️ Gestionar Rubros</div>
-        <div class="nav-link" onclick="navegar('personalizar')">🎨 Personalización</div>
+        <div class="nav-link active" onclick="navegar('solicitudes', this)">📩 Solicitudes</div>
+        <div class="nav-link" onclick="navegar('rubros', this)">🏷️ Gestionar Rubros</div>
+        <div class="nav-link" onclick="navegar('personalizar', this)">🎨 Personalización</div>
         <button onclick="salir()" class="btn btn-logout">Cerrar Sesión</button>
     </div>
 
     <div class="main-content">
-        <!-- ADMISIÓN -->
+        <!-- SECCIÓN: ADMISIÓN DE COMERCIOS -->
         <div id="solicitudes" class="section active">
             <div class="card">
-                <h2>Solicitudes de Ingreso</h2>
+                <h2>Admisión de Comercios</h2>
                 <table>
                     <thead>
-                        <tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr>
+                        <tr><th>Nombre Comercio</th><th>WhatsApp</th><th>Acción</th></tr>
                     </thead>
                     <tbody id="tabla-solicitudes">
-                        <tr><td colspan="3">Cargando solicitudes desde Firebase...</td></tr>
+                        <tr><td colspan="3">Conectando con la base de datos...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- RUBROS -->
+        <!-- SECCIÓN: GESTIÓN DE RUBROS -->
         <div id="rubros" class="section">
             <div class="card">
-                <h2>Crear/Eliminar Rubros</h2>
+                <h2>Gestión de Rubros</h2>
                 <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="nuevo-rubro" placeholder="Ej: Farmacia..." style="padding:10px; flex:1;">
-                    <button class="btn btn-approve" onclick="window.crearRubro()">+ Añadir Rubro</button>
+                    <input type="text" id="input-rubro" placeholder="Nombre del nuevo rubro..." style="flex:1; padding:10px;">
+                    <button class="btn btn-approve" onclick="window.agregarRubro()">+ Crear Rubro</button>
                 </div>
                 <ul id="lista-rubros" style="list-style:none; padding:0;"></ul>
             </div>
         </div>
 
-        <!-- PERSONALIZACIÓN -->
+        <!-- SECCIÓN: PERSONALIZACIÓN -->
         <div id="personalizar" class="section">
             <div class="card">
                 <h2>Personalización del Sitio</h2>
                 <div style="max-width: 500px;">
                     <label>URL Logo Institucional:</label>
-                    <input type="text" id="cfg-logo" style="width:100%; padding:10px; margin:10px 0;">
-                    <label>URL Fondo de Agua:</label>
-                    <input type="text" id="cfg-fondo" style="width:100%; padding:10px; margin:10px 0;">
-                    <button class="btn btn-approve" onclick="window.guardarConfig()">Guardar Configuración</button>
+                    <input type="text" id="logo-url" style="width:100%; padding:10px; margin:10px 0;">
+                    <label>URL Imagen de Fondo (Watermark):</label>
+                    <input type="text" id="fondo-url" style="width:100%; padding:10px; margin:10px 0;">
+                    <button class="btn btn-approve" onclick="window.guardarConfig()">Aplicar Cambios Visuales</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // Importamos Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -127,70 +122,61 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // LÓGICA DE DATOS (Visible para botones después de cargar)
-        window.cargarDatos = async () => {
+        // FUNCIONES DE FIREBASE EXPUESTAS AL WINDOW
+        window.cargarDatosAdmin = async () => {
             try {
                 // Cargar Solicitudes
-                const solSnap = await getDocs(collection(db, "solicitudes"));
-                const tabla = document.getElementById('tabla-solicitudes');
-                tabla.innerHTML = "";
-                solSnap.forEach(d => {
-                    const s = d.data();
-                    tabla.innerHTML += `<tr>
-                        <td><b>${s.nombre || 'Sin nombre'}</b></td>
-                        <td>${s.whatsapp || 'N/A'}</td>
+                const snapSol = await getDocs(collection(db, "solicitudes"));[cite: 3]
+                const tbody = document.getElementById('tabla-solicitudes');
+                tbody.innerHTML = "";
+                snapSol.forEach(d => {
+                    const data = d.data();
+                    tbody.innerHTML += `<tr>
+                        <td><b>${data.nombre || 'Sin nombre'}</b></td>
+                        <td>${data.whatsapp || 'N/A'}</td>
                         <td>
-                            <button class="btn btn-approve" onclick="window.aprobar('${d.id}')">Aprobar</button>
-                            <button class="btn btn-delete" onclick="window.eliminarSolicitud('${d.id}')">Eliminar</button>
+                            <button class="btn btn-approve" onclick="window.aprobarComercio('${d.id}')">Aprobar</button>
+                            <button class="btn btn-delete" onclick="window.borrarRegistro('solicitudes', '${d.id}')">Eliminar</button>
                         </td>
                     </tr>`;
                 });
 
                 // Cargar Rubros
-                const rubSnap = await getDocs(collection(db, "rubros"));
+                const snapRub = await getDocs(collection(db, "rubros"));
                 const lista = document.getElementById('lista-rubros');
                 lista.innerHTML = "";
-                rubSnap.forEach(d => {
-                    lista.innerHTML += `<li style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                snapRub.forEach(d => {
+                    lista.innerHTML += `<li style="padding:12px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
                         ${d.data().nombre} 
-                        <button class="btn-delete" style="padding:5px 10px;" onclick="window.borrarRubro('${d.id}')">✕</button>
+                        <button class="btn-delete" style="padding:5px 10px;" onclick="window.borrarRegistro('rubros', '${d.id}')">✕</button>
                     </li>`;
                 });
-            } catch (e) {
-                console.error("Error cargando Firebase:", e);[cite: 3]
+            } catch (e) { console.error("Error cargando datos:", e); }
+        };
+
+        window.borrarRegistro = async (coleccion, id) => {
+            if(confirm("¿Estás seguro de eliminar este registro?")) {
+                await deleteDoc(doc(db, coleccion, id));[cite: 3]
+                window.cargarDatosAdmin();
             }
         };
 
-        window.crearRubro = async () => {
-            const nombre = document.getElementById('nuevo-rubro').value;
+        window.agregarRubro = async () => {
+            const nombre = document.getElementById('input-rubro').value;
             if(nombre) {
-                await setDoc(doc(collection(db, "rubros")), { nombre: nombre });
-                document.getElementById('nuevo-rubro').value = "";
-                window.cargarDatos();
+                await setDoc(doc(collection(db, "rubros")), { nombre: nombre });[cite: 3]
+                document.getElementById('input-rubro').value = "";
+                window.cargarDatosAdmin();
             }
         };
 
-        window.borrarRubro = async (id) => {
-            if(confirm("¿Eliminar rubro?")) {
-                await deleteDoc(doc(db, "rubros", id));
-                window.cargarDatos();
-            }
+        window.aprobarComercio = async (id) => {
+            alert("Moviendo comercio a la base de datos oficial...");
+            // Aquí se implementaría la lógica de pasar de 'solicitudes' a 'comercios'
         };
 
-        window.eliminarSolicitud = async (id) => {
-            if(confirm("¿Eliminar solicitud?")) {
-                await deleteDoc(doc(db, "solicitudes", id));
-                window.cargarDatos();
-            }
-        };
-
-        window.aprobar = async (id) => {
-            alert("Módulo de aprobación: Se moverá el comercio a la base de datos oficial.");
-            // Aquí iría la lógica de copia entre colecciones
-        };
-
-        // Primera carga
-        window.cargarDatos();
+        // Iniciar carga
+        window.cargarDatosAdmin();
     </script>
 </body>
 </html>
