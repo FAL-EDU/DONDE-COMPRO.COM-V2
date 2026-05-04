@@ -14,12 +14,14 @@
         .main-content { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
         .section.active { display: block; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-logout { background: var(--danger); color: white; margin: 20px; width: calc(100% - 40px); }
         .btn-add { background: var(--accent); color: white; }
+        .btn:hover { opacity: 0.8; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -28,15 +30,15 @@
         <div class="sidebar-header">DONDE COMPRO ADMIN</div>
         <div class="nav-link active" onclick="navegar('solicitudes')">📩 Solicitudes</div>
         <div class="nav-link" onclick="navegar('rubros')">🏷️ Gestionar Rubros</div>
-        <div class="nav-link" onclick="navegar('config')">⚙️ Configuración / Logo</div>
+        <div class="nav-link" onclick="navegar('config')">⚙️ Configuración</div>
         <button onclick="salir()" class="btn btn-logout">Cerrar Sesión</button>
     </div>
 
     <div class="main-content">
-        <!-- SECCIÓN SOLICITUDES -->
+        <!-- SOLICITUDES -->
         <div id="solicitudes" class="section active">
             <div class="card">
-                <h2>Solicitudes Pendientes</h2>
+                <h2>Solicitudes de Comercio Pendientes</h2>
                 <table>
                     <thead><tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr></thead>
                     <tbody id="lista-solicitudes"></tbody>
@@ -44,41 +46,41 @@
             </div>
         </div>
 
-        <!-- SECCIÓN RUBROS -->
+        <!-- RUBROS -->
         <div id="rubros" class="section">
             <div class="card">
-                <h2>Gestionar Rubros</h2>
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="input-rubro" placeholder="Ej: FARMACIA" style="flex:1; padding:8px;">
-                    <button class="btn btn-add" onclick="window.agregarRubro()">+ Añadir</button>
+                <h2>Categorías de Comercio</h2>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="input-rubro" placeholder="Nueva categoría (ej: Tienda)" style="flex:1;">
+                    <button class="btn btn-add" onclick="window.agregarRubro()">+ Guardar</button>
                 </div>
-                <table shadow>
-                    <thead><tr><th>Nombre del Rubro</th><th>Acciones</th></tr></thead>
+                <table>
+                    <thead><tr><th>Rubro</th><th>Acción</th></tr></thead>
                     <tbody id="lista-rubros"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- SECCIÓN CONFIGURACIÓN -->
+        <!-- CONFIGURACIÓN -->
         <div id="config" class="section">
             <div class="card">
-                <h2>Apariencia del Sitio</h2>
-                <label>URL Logo Institucional:</label>
-                <input type="text" id="cfg-logo" style="width:100%; padding:8px; margin:10px 0;">
-                <label>URL Fondo de Agua (Header):</label>
-                <input type="text" id="cfg-fondo" style="width:100%; padding:8px; margin:10px 0;">
-                <button class="btn btn-add" onclick="window.guardarAjustes()">Guardar Cambios</button>
+                <h2>Identidad Institucional</h2>
+                <label>URL Logo:</label>
+                <input type="text" id="cfg-logo" style="width:100%;" placeholder="https://ejemplo.com/logo.png">
+                <label>URL Fondo de Pantalla Principal:</label>
+                <input type="text" id="cfg-fondo" style="width:100%;" placeholder="https://ejemplo.com/fondo.jpg">
+                <button class="btn btn-add" onclick="window.guardarAjustes()">Aplicar Cambios</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Función de navegación corregida
+        // Funciones Globales de Navegación
         function navegar(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (event) event.currentTarget.classList.add('active');
         }
 
         function salir() {
@@ -91,7 +93,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Configuración directa de Firebase[cite: 9]
         const firebaseConfig = {
             apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
             authDomain: "donde-compro-oficial.firebaseapp.com",
@@ -104,15 +105,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- GESTIÓN DE RUBROS ---
+        // --- MÓDULO DE RUBROS ---
         window.agregarRubro = async () => {
-            const rubro = document.getElementById('input-rubro').value.trim();
-            if(!rubro) return;
-            try {
-                await setDoc(doc(db, "rubros", rubro.toLowerCase()), { nombre: rubro });[cite: 5]
-                document.getElementById('input-rubro').value = "";
-                cargarRubros();
-            } catch(e) { console.error("Error:", e); }
+            const r = document.getElementById('input-rubro').value.trim();
+            if(!r) return;
+            await setDoc(doc(db, "rubros", r.toLowerCase()), { nombre: r });[cite: 5]
+            document.getElementById('input-rubro').value = "";
+            cargarRubros();
         };
 
         const cargarRubros = async () => {
@@ -121,18 +120,18 @@
             lista.innerHTML = "";
             snap.forEach(d => {
                 lista.innerHTML += `<tr><td>${d.data().nombre}</td>
-                <td><button class="btn" style="background:#e74c3c; color:white;" onclick="window.borrarRubro('${d.id}')">Eliminar</button></td></tr>`;
+                <td><button class="btn" style="background:#e74c3c; color:white;" onclick="window.borrarRubro('${d.id}')">Borrar</button></td></tr>`;
             });
         };
 
         window.borrarRubro = async (id) => {
-            if(confirm("¿Eliminar rubro?")) {
+            if(confirm("¿Eliminar este rubro?")) {
                 await deleteDoc(doc(db, "rubros", id));[cite: 5]
                 cargarRubros();
             }
         };
 
-        // --- GESTIÓN DE SOLICITUDES ---
+        // --- MÓDULO DE SOLICITUDES ---
         const cargarSolicitudes = async () => {
             const snap = await getDocs(collection(db, "solicitudes"));[cite: 5]
             const lista = document.getElementById('lista-solicitudes');
@@ -152,15 +151,15 @@
             cargarSolicitudes();
         };
 
-        // --- GESTIÓN DE CONFIGURACIÓN ---
+        // --- CONFIGURACIÓN ---
         window.guardarAjustes = async () => {
             const logo = document.getElementById('cfg-logo').value;
             const fondo = document.getElementById('cfg-fondo').value;
-            await setDoc(doc(db, "configuracion", "apariencia"), { logo, fondo_inicio: fondo });[cite: 5]
-            alert("Apariencia actualizada correctamente");
+            await setDoc(doc(db, "configuracion", "apariencia"), { logo: logo, fondo: fondo });[cite: 5]
+            alert("Cambios guardados con éxito");
         };
 
-        // Carga inicial
+        // Ejecutar carga inicial
         cargarSolicitudes();
         cargarRubros();
     </script>
