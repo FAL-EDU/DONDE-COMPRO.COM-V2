@@ -2,166 +2,120 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Dónde Compro</title>
+    <title>Panel de Administración - Dónde Compro</title>
     <style>
-        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; --text: #ffffff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; }
-        .sidebar { width: 260px; background: var(--primary); color: var(--text); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 25px; background: rgba(0,0,0,0.2); text-align: center; font-weight: bold; }
-        .nav-link { color: #bdc3c7; padding: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .nav-link.active { background: var(--secondary); color: white; }
-        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background: #f0f2f5; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
+        .nav-btn { background: none; border: none; color: #bdc3c7; padding: 15px; text-align: left; cursor: pointer; font-size: 16px; border-bottom: 1px solid #34495e; }
+        .nav-btn.active { color: white; background: #34495e; }
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
         .section.active { display: block; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-logout { background: var(--danger); color: white; margin: 20px; width: calc(100% - 40px); }
-        .btn-add { background: var(--accent); color: white; }
-        .btn:hover { opacity: 0.8; }
-        input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .btn-aprobar { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="sidebar-header">DONDE COMPRO ADMIN</div>
-        <div class="nav-link active" onclick="navegar('solicitudes')">📩 Solicitudes</div>
-        <div class="nav-link" onclick="navegar('rubros')">🏷️ Gestionar Rubros</div>
-        <div class="nav-link" onclick="navegar('config')">⚙️ Configuración</div>
-        <button onclick="salir()" class="btn btn-logout">Cerrar Sesión</button>
-    </div>
+<div class="sidebar">
+    <h2 style="text-align:center;">ADMIN</h2>
+    <button class="nav-btn active" onclick="cambiarSeccion('solicitudes')">📩 Solicitudes</button>
+    <button class="nav-btn" onclick="cambiarSeccion('rubros')">🏷️ Gestionar Rubros</button>
+    <button class="nav-btn" style="margin-top:auto; color:#e74c3c;" onclick="cerrar()">Cerrar Sesión</button>
+</div>
 
-    <div class="main-content">
-        <!-- SOLICITUDES -->
-        <div id="solicitudes" class="section active">
-            <div class="card">
-                <h2>Solicitudes de Comercio Pendientes</h2>
-                <table>
-                    <thead><tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr></thead>
-                    <tbody id="lista-solicitudes"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- RUBROS -->
-        <div id="rubros" class="section">
-            <div class="card">
-                <h2>Categorías de Comercio</h2>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="input-rubro" placeholder="Nueva categoría (ej: Tienda)" style="flex:1;">
-                    <button class="btn btn-add" onclick="window.agregarRubro()">+ Guardar</button>
-                </div>
-                <table>
-                    <thead><tr><th>Rubro</th><th>Acción</th></tr></thead>
-                    <tbody id="lista-rubros"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- CONFIGURACIÓN -->
-        <div id="config" class="section">
-            <div class="card">
-                <h2>Identidad Institucional</h2>
-                <label>URL Logo:</label>
-                <input type="text" id="cfg-logo" style="width:100%;" placeholder="https://ejemplo.com/logo.png">
-                <label>URL Fondo de Pantalla Principal:</label>
-                <input type="text" id="cfg-fondo" style="width:100%;" placeholder="https://ejemplo.com/fondo.jpg">
-                <button class="btn btn-add" onclick="window.guardarAjustes()">Aplicar Cambios</button>
-            </div>
+<div class="main">
+    <div id="solicitudes" class="section active">
+        <div class="card">
+            <h2>Solicitudes Pendientes</h2>
+            <p>Aquí aparecerán los comercios que se registraron en tu formulario.</p>
+            <table>
+                <thead>
+                    <tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr>
+                </thead>
+                <tbody id="tabla-solicitudes">
+                    <!-- Los datos cargan aquí -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <script>
-        // Funciones Globales de Navegación
-        function navegar(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if (event) event.currentTarget.classList.add('active');
+    <div id="rubros" class="section">
+        <div class="card">
+            <h2>Rubros Disponibles</h2>
+            <div style="margin-bottom:20px;">
+                <input type="text" id="nombre-rubro" placeholder="Ej: Farmacia" style="padding:8px;">
+                <button onclick="window.crearRubro()" style="padding:8px; cursor:pointer;">+ Añadir</button>
+            </div>
+            <ul id="lista-rubros"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Navegación Básica (Fuera del módulo para evitar ReferenceError)
+    function cambiarSeccion(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+    function cerrar() { localStorage.clear(); window.location.href='login.html'; }
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Configuración exacta de tu proyecto
+    const firebaseConfig = {
+      apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
+      authDomain: "donde-compro-oficial.firebaseapp.com",
+      projectId: "donde-compro-oficial",
+      storageBucket: "donde-compro-oficial.firebasestorage.app",
+      messagingSenderId: "113447539181",
+      appId: "1:113447539181:web:6d91fc4fe96bb83d82d7e4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // CARGAR SOLICITUDES DESDE FIRESTORE
+    async function cargarSolicitudes() {
+        const querySnapshot = await getDocs(collection(db, "solicitudes"));
+        const tabla = document.getElementById('tabla-solicitudes');
+        tabla.innerHTML = "";
+        
+        querySnapshot.forEach((docSnap) => {
+            const dato = docSnap.data();
+            const fila = `<tr>
+                <td>${dato.nombre}</td>
+                <td>${dato.whatsapp}</td>
+                <td><button class="btn-aprobar" onclick="window.activarComercio('${docSnap.id}')">Aprobar</button></td>
+            </tr>`;
+            tabla.innerHTML += fila;
+        });
+    }
+
+    // APROBAR COMERCIO (Mover de 'solicitudes' a 'comercios')
+    window.activarComercio = async (id) => {
+        alert("Procesando aprobación para: " + id);
+        // Aquí iría la lógica para mover el documento en Firestore
+    };
+
+    window.crearRubro = async () => {
+        const rubro = document.getElementById('nombre-rubro').value;
+        if(rubro) {
+            await setDoc(doc(db, "rubros", rubro.toLowerCase()), { nombre: rubro });
+            alert("Rubro guardado");
+            location.reload();
         }
+    };
 
-        function salir() {
-            localStorage.clear();[cite: 4]
-            window.location.href = 'login.html';
-        }
-    </script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
-            authDomain: "donde-compro-oficial.firebaseapp.com",
-            projectId: "donde-compro-oficial",
-            storageBucket: "donde-compro-oficial.firebasestorage.app",
-            messagingSenderId: "113447539181",
-            appId: "1:113447539181:web:6d91fc4fe96bb83d82d7e4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // --- MÓDULO DE RUBROS ---
-        window.agregarRubro = async () => {
-            const r = document.getElementById('input-rubro').value.trim();
-            if(!r) return;
-            await setDoc(doc(db, "rubros", r.toLowerCase()), { nombre: r });[cite: 5]
-            document.getElementById('input-rubro').value = "";
-            cargarRubros();
-        };
-
-        const cargarRubros = async () => {
-            const snap = await getDocs(collection(db, "rubros"));[cite: 5]
-            const lista = document.getElementById('lista-rubros');
-            lista.innerHTML = "";
-            snap.forEach(d => {
-                lista.innerHTML += `<tr><td>${d.data().nombre}</td>
-                <td><button class="btn" style="background:#e74c3c; color:white;" onclick="window.borrarRubro('${d.id}')">Borrar</button></td></tr>`;
-            });
-        };
-
-        window.borrarRubro = async (id) => {
-            if(confirm("¿Eliminar este rubro?")) {
-                await deleteDoc(doc(db, "rubros", id));[cite: 5]
-                cargarRubros();
-            }
-        };
-
-        // --- MÓDULO DE SOLICITUDES ---
-        const cargarSolicitudes = async () => {
-            const snap = await getDocs(collection(db, "solicitudes"));[cite: 5]
-            const lista = document.getElementById('lista-solicitudes');
-            lista.innerHTML = "";
-            snap.forEach(d => {
-                const s = d.data();
-                lista.innerHTML += `<tr><td>${s.nombre}</td><td>${s.whatsapp}</td>
-                <td><button class="btn btn-add" onclick="window.aprobar('${d.id}')">Autorizar</button></td></tr>`;
-            });
-        };
-
-        window.aprobar = async (id) => {
-            const ref = doc(db, "solicitudes", id);
-            const data = (await getDoc(ref)).data();
-            await setDoc(doc(db, "comercios", id), { ...data, estado: "activo" });[cite: 5]
-            await deleteDoc(ref);[cite: 5]
-            cargarSolicitudes();
-        };
-
-        // --- CONFIGURACIÓN ---
-        window.guardarAjustes = async () => {
-            const logo = document.getElementById('cfg-logo').value;
-            const fondo = document.getElementById('cfg-fondo').value;
-            await setDoc(doc(db, "configuracion", "apariencia"), { logo: logo, fondo: fondo });[cite: 5]
-            alert("Cambios guardados con éxito");
-        };
-
-        // Ejecutar carga inicial
-        cargarSolicitudes();
-        cargarRubros();
-    </script>
+    // Ejecución inicial
+    cargarSolicitudes();
+</script>
 </body>
 </html>
