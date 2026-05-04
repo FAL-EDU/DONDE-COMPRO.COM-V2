@@ -3,164 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrativo - Dónde Compro</title>
+    <title>Master Admin - Dónde Compro</title>
     <style>
-        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; --text: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; }
+        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         /* Sidebar */
-        .sidebar { width: 260px; background: var(--primary); color: var(--text); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 30px; text-align: center; font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-link { padding: 18px 25px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; color: #bdc3c7; }
-        .nav-link:hover, .nav-link.active { background: var(--secondary); color: white; border-left-color: var(--accent); }
-        
-        /* Contenido */
-        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        .sidebar { width: 250px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px; }
+        .sidebar h2 { font-size: 1.2rem; margin-bottom: 30px; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; }
+        .nav-link { color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; cursor: pointer; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background: var(--secondary); color: white; }
+
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 30px; }
         .section { display: none; }
         .section.active { display: block; }
-
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { margin-top: 0; color: var(--primary); }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; background: #f8f9fa; padding: 12px; color: var(--primary); }
         td { padding: 12px; border-bottom: 1px solid #eee; }
         
-        .btn { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-approve { background: var(--accent); color: white; }
-        .btn-delete { background: var(--danger); color: white; }
-        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); margin: 20px; }
+        /* Modales */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--accent); color: white; margin-bottom: 15px; }
+        .btn-del { background: var(--danger); color: white; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
     </style>
-
-    <script>
-        // Función de navegación (Global)
-        function navegar(id, elemento) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            
-            document.getElementById(id).classList.add('active');
-            elemento.classList.add('active');
-        }
-
-        function salir() {
-            if(confirm("¿Cerrar sesión?")) {
-                window.location.href = 'index.html';[cite: 4]
-            }
-        }
-    </script>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-header">ADMIN</div>
-        <div class="nav-link active" onclick="navegar('solicitudes', this)">📩 Solicitudes</div>
-        <div class="nav-link" onclick="navegar('rubros', this)">🏷️ Gestionar Rubros</div>
-        <div class="nav-link" onclick="navegar('personalizar', this)">🎨 Personalización</div>
-        <button onclick="salir()" class="btn btn-logout">Cerrar Sesión</button>
+        <h2>ADMIN CONTROL</h2>
+        <div class="nav-link active" onclick="showSection('solicitudes')">📩 Solicitudes</div>
+        <div class="nav-link" onclick="showSection('comercios')">🏪 Comercios Activos</div>
+        <div class="nav-link" onclick="showSection('rubros')">🏷️ Gestionar Rubros</div>
+        <div class="nav-link" onclick="showSection('config')">⚙️ Configuración / Logo</div>
+        <div style="margin-top: auto;">
+            <button onclick="cerrarSesion()" class="btn btn-del" style="width: 100%;">Cerrar Sesión</button>
+        </div>
     </div>
 
     <div class="main-content">
-        <!-- SOLICITUDES -->
+        
+        <!-- SECCIÓN SOLICITUDES (La que ya tenías) -->
         <div id="solicitudes" class="section active">
             <div class="card">
-                <h2>Admisión de Comercios</h2>
+                <h2>Solicitudes Pendientes</h2>
                 <table>
-                    <thead>
-                        <tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr>
-                    </thead>
-                    <tbody id="tabla-solicitudes">
-                        <tr><td colspan="3">Cargando datos...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Comercio</th><th>Usuario</th><th>Acciones</th></tr></thead>
+                    <tbody id="lista-solicitudes"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- RUBROS -->
-        <div id="rubros" class="section">
+        <!-- SECCIÓN COMERCIOS ACTIVOS -->
+        <div id="comercios" class="section">
             <div class="card">
-                <h2>Gestión de Rubros</h2>
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="nuevo-rubro" placeholder="Nombre del rubro..." style="flex:1; padding:10px;">
-                    <button class="btn btn-approve" onclick="window.agregarRubro()">+ Añadir</button>
-                </div>
-                <ul id="lista-rubros"></ul>
+                <h2>Comercios Activos por Rubro</h2>
+                <select id="filtro-rubro" onchange="cargarComerciosActivos()">
+                    <option value="todos">Todos los rubros</option>
+                </select>
+                <table>
+                    <thead><tr><th>Comercio</th><th>Rubro</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="lista-activos"></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- PERSONALIZACIÓN -->
-        <div id="personalizar" class="section">
+        <!-- SECCIÓN GESTIÓN DE RUBROS -->
+        <div id="rubros" class="section">
             <div class="card">
-                <h2>Personalización Visual</h2>
-                <label>URL Logo Institucional:</label><br>
-                <input type="text" id="config-logo" style="width:100%; padding:10px; margin:10px 0;"><br>
-                <button class="btn btn-approve" onclick="alert('Configuración guardada')">Guardar Cambios</button>
+                <h2>Gestión de Rubros (Categorías)</h2>
+                <button class="btn btn-add" onclick="abrirModalRubro()">+ Nuevo Rubro</button>
+                <table>
+                    <thead><tr><th>Nombre del Rubro</th><th>Acciones</th></tr></thead>
+                    <tbody id="lista-rubros"></tbody>
+                </table>
             </div>
+        </div>
+
+        <!-- SECCIÓN CONFIGURACIÓN -->
+        <div id="config" class="section">
+            <div class="card">
+                <h2>Personalización de la APP</h2>
+                <label>URL del Logo (Imagen)</label>
+                <input type="text" id="app-logo" placeholder="https://enlace-a-tu-imagen.png">
+                <button class="btn btn-add" onclick="guardarConfig()">Guardar Cambios</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL NUEVO RUBRO -->
+    <div id="modal-rubro" class="modal">
+        <div class="modal-content">
+            <h3>Añadir Nuevo Rubro</h3>
+            <input type="text" id="nuevo-rubro-nombre" placeholder="Nombre (ej: Veterinaria)">
+            <button class="btn btn-add" style="width: 100%;" onclick="guardarRubro()">GUARDAR RUBRO</button>
+            <button class="btn" style="width: 100%; background: none;" onclick="cerrarModalRubro()">Cancelar</button>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, getDocs, doc, setDoc, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Configuración limpia sin caracteres extraños
-        const firebaseConfig = {
-            apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
-            authDomain: "donde-compro-oficial.firebaseapp.com",
-            projectId: "donde-compro-oficial",
-            storageBucket: "donde-compro-oficial.firebasestorage.app",
-            messagingSenderId: "113447539181",
-            appId: "1:113447539181:web:6d91fc4fe96bb83d82d7e4"
-        };
+    // --- NAVEGACIÓN ---
+    window.showSection = (id) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(id === 'comercios') cargarComerciosActivos();
+        if(id === 'rubros') cargarRubros();
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // --- GESTIÓN DE SOLICITUDES (Mejorado de image_89b0fd.png) ---
+    const cargarSolicitudes = async () => {
+        const snap = await getDocs(collection(db, "solicitudes"));
+        const lista = document.getElementById('lista-solicitudes');
+        lista.innerHTML = "";
+        snap.forEach(d => {
+            const s = d.data();
+            lista.innerHTML += `<tr><td>${s.nombre}</td><td>${s.usuario}</td>
+                <td><button onclick="activar('${d.id}')" class="btn btn-add">Activar</button></td></tr>`;
+        });
+    };
 
-        // Cargar solicitudes
-        window.obtenerDatos = async () => {
-            const tbody = document.getElementById('tabla-solicitudes');
-            try {
-                const querySnapshot = await getDocs(collection(db, "solicitudes"));[cite: 3]
-                tbody.innerHTML = "";
-                querySnapshot.forEach((d) => {
-                    const item = d.data();
-                    tbody.innerHTML += `<tr>
-                        <td>${item.nombre || 'S/N'}</td>
-                        <td>${item.whatsapp || 'S/D'}</td>
-                        <td>
-                            <button class="btn btn-approve" onclick="window.aprobar('${d.id}')">Aprobar</button>
-                            <button class="btn btn-delete" onclick="window.eliminar('${d.id}', 'solicitudes')">X</button>
-                        </td>
-                    </tr>`;
-                });
-            } catch (error) {
-                tbody.innerHTML = "<tr><td colspan='3'>Error al cargar datos.</td></tr>";
+    window.activar = async (id) => {
+        const ref = doc(db, "solicitudes", id);
+        const snap = await getDoc(ref);
+        if(snap.exists()){
+            await setDoc(doc(db, "comercios", id), { ...snap.data(), estado: "activo" }); //
+            await deleteDoc(ref); //
+            alert("Comercio activado");
+            cargarSolicitudes();
+        }
+    };
+
+    // --- GESTIÓN DE RUBROS ---
+    window.abrirModalRubro = () => document.getElementById('modal-rubro').style.display='flex';
+    window.cerrarModalRubro = () => document.getElementById('modal-rubro').style.display='none';
+
+    window.guardarRubro = async () => {
+        const nombre = document.getElementById('nuevo-rubro-nombre').value.trim();
+        if(!nombre) return;
+        await setDoc(doc(db, "rubros", nombre.toLowerCase()), { nombre: nombre });
+        cerrarModalRubro();
+        cargarRubros();
+    };
+
+    const cargarRubros = async () => {
+        const snap = await getDocs(collection(db, "rubros"));
+        const lista = document.getElementById('lista-rubros');
+        const filtro = document.getElementById('filtro-rubro');
+        lista.innerHTML = "";
+        filtro.innerHTML = '<option value="todos">Todos los rubros</option>';
+        
+        snap.forEach(d => {
+            lista.innerHTML += `<tr><td>${d.data().nombre}</td>
+                <td><button onclick="eliminarRubro('${d.id}')" class="btn btn-del">Eliminar</button></td></tr>`;
+            filtro.innerHTML += `<option value="${d.id}">${d.data().nombre}</option>`;
+        });
+    };
+
+    window.eliminarRubro = async (id) => {
+        if(confirm("¿Eliminar este rubro?")) {
+            await deleteDoc(doc(db, "rubros", id));
+            cargarRubros();
+        }
+    };
+
+    // --- COMERCIOS ACTIVOS ---
+    window.cargarComerciosActivos = async () => {
+        const rubroElegido = document.getElementById('filtro-rubro').value;
+        const snap = await getDocs(collection(db, "comercios"));
+        const lista = document.getElementById('lista-activos');
+        lista.innerHTML = "";
+        
+        snap.forEach(d => {
+            const c = d.data();
+            if(rubroElegido === 'todos' || c.categoria === rubroElegido) {
+                lista.innerHTML += `<tr><td>${c.nombre}</td><td>${c.categoria || 'Sin rubro'}</td>
+                    <td>Activo</td><td><button onclick="eliminarComercio('${d.id}')" class="btn btn-del">Baja</button></td></tr>`;
             }
-        };
+        });
+    };
 
-        // Eliminar registros
-        window.eliminar = async (id, col) => {
-            if(confirm("¿Seguro que deseas eliminarlo?")) {
-                await deleteDoc(doc(db, col, id));[cite: 3]
-                window.obtenerDatos();
-            }
-        };
+    window.eliminarComercio = async (id) => {
+        if(confirm("¿Dar de baja a este comercio definitivamente?")) {
+            await deleteDoc(doc(db, "comercios", id));
+            cargarComerciosActivos();
+        }
+    };
 
-        window.agregarRubro = async () => {
-            const nombre = document.getElementById('nuevo-rubro').value;
-            if(nombre) {
-                await setDoc(doc(collection(db, "rubros")), { nombre: nombre });[cite: 3]
-                document.getElementById('nuevo-rubro').value = "";
-                alert("Rubro añadido");
-                // Aquí podrías recargar una lista de rubros
-            }
-        };
+    // --- CONFIGURACIÓN ---
+    window.guardarConfig = async () => {
+        const logo = document.getElementById('app-logo').value;
+        await setDoc(doc(db, "configuracion", "general"), { logo: logo });
+        alert("Configuración guardada");
+    };
 
-        window.aprobar = (id) => {
-            alert("Comercio " + id + " aprobado. (Moviendo a colección de comercios activos)");[cite: 2]
-        };
+    // Inicio
+    cargarSolicitudes();
+    cargarRubros();
 
-        // Inicio
-        window.obtenerDatos();
-    </script>
+</script>
 </body>
 </html>
