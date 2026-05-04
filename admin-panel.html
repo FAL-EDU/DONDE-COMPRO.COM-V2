@@ -6,203 +6,149 @@
     <title>Panel Administrativo - Dónde Compro</title>
     <style>
         :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; --text: #ffffff; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         /* Sidebar */
         .sidebar { width: 260px; background: var(--primary); color: var(--text); display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
-        .sidebar-header { padding: 30px; text-align: center; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header { padding: 30px; text-align: center; font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .nav-link { padding: 18px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; color: #bdc3c7; text-decoration: none; border-left: 4px solid transparent; }
         .nav-link:hover { background: var(--secondary); color: white; }
         .nav-link.active { background: var(--secondary); color: white; border-left-color: var(--accent); }
         
         /* Main Content */
         .main-content { flex: 1; padding: 40px; overflow-y: auto; }
-        .section { display: none; animation: fadeIn 0.3s ease; }
-        .section.active { display: block; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Tables & Cards */
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { margin-top: 0; color: var(--primary); font-size: 1.8rem; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin-top: 0; color: var(--primary); }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
-        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; }
+        td { padding: 15px; border-bottom: 1px solid #eee; }
 
-        /* Buttons */
-        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.85rem; }
+        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
         .btn-approve { background: var(--accent); color: white; }
-        .btn-delete { background: var(--danger); color: white; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); margin: 20px; padding: 12px; }
-        .btn-logout:hover { background: var(--danger); color: white; }
-
-        /* Form elements */
-        .input-group { display: flex; gap: 10px; margin-bottom: 25px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+        .btn-delete { background: var(--danger); color: white; margin-left: 5px; }
+        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); margin: 20px; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
         <div class="sidebar-header">ADMIN</div>
-        <div class="nav-link active" onclick="navegar('solicitudes')">📩 Solicitudes</div>
-        <div class="nav-link" onclick="navegar('rubros')">🏷️ Gestionar Rubros</div>
-        <div class="nav-link" onclick="navegar('config')">⚙️ Configuración</div>
+        <div class="nav-link active" id="link-solicitudes" onclick="navegar('solicitudes')">📩 Solicitudes</div>
+        <div class="nav-link" id="link-rubros" onclick="navegar('rubros')">🏷️ Gestionar Rubros</div>
         <button onclick="salir()" class="btn btn-logout">Cerrar Sesión</button>
     </div>
 
     <div class="main-content">
-        <!-- SECCIÓN SOLICITUDES -->
         <div id="solicitudes" class="section active">
             <div class="card">
                 <h2>Solicitudes Pendientes</h2>
-                <p style="color: #666;">Gestiona los comercios que desean unirse a la red.</p>
                 <table>
                     <thead>
-                        <tr>
-                            <th>Comercio</th>
-                            <th>WhatsApp</th>
-                            <th>Acciones</th>
-                        </tr>
+                        <tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr>
                     </thead>
-                    <tbody id="tabla-solicitudes">
-                        <!-- Datos de Firebase aquí -->
-                    </tbody>
+                    <tbody id="tabla-solicitudes"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- SECCIÓN RUBROS -->
         <div id="rubros" class="section">
             <div class="card">
-                <h2>Categorías de Negocio</h2>
-                <div class="input-group">
-                    <input type="text" id="nombre-rubro" placeholder="Ej: Veterinaria, Panadería...">
-                    <button class="btn btn-approve" onclick="window.crearRubro()">+ Añadir Rubro</button>
+                <h2>Gestionar Rubros</h2>
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input type="text" id="nuevo-rubro" placeholder="Nombre del rubro..." style="padding:10px; flex:1;">
+                    <button class="btn btn-approve" onclick="crearRubro()">+ Añadir</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr><th>Nombre del Rubro</th><th>Acción</th></tr>
-                    </thead>
-                    <tbody id="lista-rubros"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- SECCIÓN CONFIGURACIÓN -->
-        <div id="config" class="section">
-            <div class="card">
-                <h2>Identidad Institucional</h2>
-                <div style="max-width: 500px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:bold;">URL Logo (.png/.jpg)</label>
-                    <input type="text" id="cfg-logo" style="width:100%; margin-bottom:20px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:bold;">URL Fondo de Agua</label>
-                    <input type="text" id="cfg-fondo" style="width:100%; margin-bottom:20px;">
-                    <button class="btn btn-approve" onclick="window.guardarAjustes()">Guardar Cambios</button>
-                </div>
+                <ul id="lista-rubros" style="list-style:none; padding:0;"></ul>
             </div>
         </div>
     </div>
 
-    <script>
-        // Navegación Global (Independiente de Firebase para evitar errores de carga)
-        function navegar(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        function salir() {
-            localStorage.clear();[cite: 4]
-            window.location.href = 'login.html';
-        }
-    </script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Configuración unificada con tu proyecto[cite: 4]
         const firebaseConfig = {
-          apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
-          authDomain: "donde-compro-oficial.firebaseapp.com",
-          projectId: "donde-compro-oficial",
-          storageBucket: "donde-compro-oficial.firebasestorage.app",
-          messagingSenderId: "113447539181",
-          appId: "1:113447539181:web:6d91fc4fe96bb83d82d7e4"
+            apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
+            authDomain: "donde-compro-oficial.firebaseapp.com",
+            projectId: "donde-compro-oficial",
+            storageBucket: "donde-compro-oficial.firebasestorage.app",
+            messagingSenderId: "113447539181",
+            appId: "1:113447539181:web:6d91fc4fe96bb83d82d7e4"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // CARGAR SOLICITUDES
-        const cargarSolicitudes = async () => {
-            const snap = await getDocs(collection(db, "solicitudes"));
-            const tabla = document.getElementById('tabla-solicitudes');
-            tabla.innerHTML = "";
-            snap.forEach(d => {
-                const s = d.data();
-                tabla.innerHTML += `<tr>
-                    <td style="font-weight:bold;">${s.nombre}</td>
-                    <td>${s.whatsapp}</td>
-                    <td>
-                        <button class="btn btn-approve" onclick="window.aprobar('${d.id}')">Aprobar</button>
-                        <button class="btn btn-delete" onclick="window.eliminarSolicitud('${d.id}')">Eliminar</button>
-                    </td>
-                </tr>`;
-            });
+        // --- SOLUCIÓN A LOS ERRORES DE CONSOLA ---
+        // Exponemos las funciones al objeto 'window' para que el HTML pueda verlas
+        
+        window.navegar = (id) => {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('link-' + id).classList.add('active');
         };
 
-        // ACCIÓN: ELIMINAR (Limpiar duplicados o pruebas)
-        window.eliminarSolicitud = async (id) => {
-            if(confirm("¿Deseas eliminar permanentemente esta solicitud?")) {
-                try {
-                    await deleteDoc(doc(db, "solicitudes", id));
-                    cargarSolicitudes();
-                } catch(e) { console.error(e); }
+        window.salir = () => {
+            if(confirm("¿Cerrar sesión?")) window.location.href = 'index.html';[cite: 4]
+        };
+
+        async function cargarDatos() {
+            try {
+                // Cargar Solicitudes
+                const solSnap = await getDocs(collection(db, "solicitudes"));[cite: 3]
+                const tabla = document.getElementById('tabla-solicitudes');
+                tabla.innerHTML = "";
+                solSnap.forEach(d => {
+                    const s = d.data();
+                    tabla.innerHTML += `<tr>
+                        <td>${s.nombre || 'Sin nombre'}</td>
+                        <td>${s.whatsapp || 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-approve" onclick="aprobar('${d.id}')">Aprobar</button>
+                            <button class="btn btn-delete" onclick="eliminar('${d.id}')">Eliminar</button>
+                        </td>
+                    </tr>`;
+                });
+
+                // Cargar Rubros
+                const rubSnap = await getDocs(collection(db, "rubros"));
+                const lista = document.getElementById('lista-rubros');
+                lista.innerHTML = "";
+                rubSnap.forEach(d => {
+                    lista.innerHTML += `<li style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                        ${d.data().nombre} 
+                        <button class="btn-delete" style="padding:5px;" onclick="borrarRubro('${d.id}')">✕</button>
+                    </li>`;
+                });
+            } catch (error) {
+                console.error("Error de permisos:", error);
+                alert("Error de Firebase: Revisa que las Reglas de Seguridad en tu consola de Firebase permitan lectura/escritura.");[cite: 3]
+            }
+        }
+
+        window.eliminar = async (id) => {
+            if(confirm("¿Eliminar solicitud?")) {
+                await deleteDoc(doc(db, "solicitudes", id));
+                cargarDatos();
             }
         };
 
-        // ACCIÓN: APROBAR (Mover a comercios activos)
-        window.aprobar = async (id) => {
-            const ref = doc(db, "solicitudes", id);
-            const data = (await getDoc(ref)).data();
-            await setDoc(doc(db, "comercios", id), { ...data, estado: "activo" });
-            await deleteDoc(ref);
-            alert("Comercio activado con éxito");
-            cargarSolicitudes();
-        };
-
-        // GESTIÓN DE RUBROS
         window.crearRubro = async () => {
-            const r = document.getElementById('nombre-rubro').value.trim();
-            if(!r) return;
-            await setDoc(doc(db, "rubros", r.toLowerCase()), { nombre: r });
-            document.getElementById('nombre-rubro').value = "";
-            cargarRubros();
-        };
-
-        const cargarRubros = async () => {
-            const snap = await getDocs(collection(db, "rubros"));
-            const lista = document.getElementById('lista-rubros');
-            lista.innerHTML = "";
-            snap.forEach(d => {
-                lista.innerHTML += `<tr><td>${d.data().nombre}</td>
-                <td><button class="btn btn-delete" onclick="window.borrarRubro('${d.id}')">Borrar</button></td></tr>`;
-            });
-        };
-
-        window.borrarRubro = async (id) => {
-            if(confirm("¿Eliminar este rubro?")) {
-                await deleteDoc(doc(db, "rubros", id));
-                cargarRubros();
+            const nombre = document.getElementById('nuevo-rubro').value;
+            if(nombre) {
+                await setDoc(doc(collection(db, "rubros")), { nombre: nombre });
+                document.getElementById('nuevo-rubro').value = "";
+                cargarDatos();
             }
         };
 
-        // Inicio
-        cargarSolicitudes();
-        cargarRubros();
+        // Carga inicial
+        cargarDatos();
     </script>
 </body>
 </html>
