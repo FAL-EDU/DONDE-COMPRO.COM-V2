@@ -2,256 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Gestión - DÓNDE COMPRO</title>
+    <title>Mi Panel - Comerciante</title>
     <style>
-        :root { 
-            --primary: #2c3e50; 
-            --secondary: #27ae60; 
-            --accent: #f39c12;
-            --light: #f4f7f6; 
-            --danger: #e74c3c; 
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; }
-        
-        header { 
-            background: white; padding: 20px; border-radius: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 25px; border-left: 8px solid var(--secondary); 
-        }
-        h1 { color: var(--primary); margin: 0; font-size: 1.4rem; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { font-size: 1.1rem; color: var(--primary); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background: #fafafa; font-size: 0.95rem; }
-        
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-save { background: var(--secondary); color: white; }
-        .btn-save:hover { background: #219150; }
-        .btn-action { background: var(--primary); color: white; margin-bottom: 10px; }
-        .btn-product { background: var(--accent); color: white; margin-top: 10px; }
-        .btn-logout { background: #7f8c8d; color: white; width: auto; padding: 8px 15px; font-size: 0.8rem; }
-        .btn-delete { background: var(--danger); color: white; padding: 5px; font-size: 0.7rem; margin-top: 5px; border-radius: 5px; }
-
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; background: #e8f5e9; color: #2e7d32; margin-top: 5px; }
-
-        /* Estilos para Modales */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
-        .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .close-btn { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #999; }
-        
-        /* Listado de Productos */
-        .product-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; max-height: 450px; overflow-y: auto; padding: 10px; }
-        .product-card { border: 1px solid #eee; padding: 12px; border-radius: 12px; text-align: center; background: #fff; position: relative; transition: 0.2s; }
-        .product-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; background: #f9f9f9; }
-        .product-card h4 { margin: 5px 0; font-size: 0.9rem; color: var(--primary); }
-        .product-card p { margin: 0; color: var(--secondary); font-weight: bold; }
-
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        body { font-family: sans-serif; padding: 20px; background: #f0f2f5; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .p-card { background: white; padding: 15px; border-radius: 8px; text-align: center; }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <header>
-            <div>
-                <h1 id="comercio-nombre">Cargando comercio...</h1>
-                <span class="status-badge">Tienda Activa ✅</span>
-            </div>
-            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
-        </header>
-
-        <div class="grid">
-            <!-- PANEL IZQUIERDO: CONFIGURACIÓN -->
-            <div class="card">
-                <h2>📍 Mi Tienda</h2>
-                <div class="form-group">
-                    <label>NOMBRE DEL COMERCIO</label>
-                    <input type="text" id="edit-nombre">
-                </div>
-                <div class="form-group">
-                    <label>DIRECCIÓN FÍSICA</label>
-                    <input type="text" id="edit-direccion">
-                </div>
-                <div class="form-group">
-                    <label>WHATSAPP (Ej: 3456788789)</label>
-                    <input type="text" id="edit-whatsapp">
-                </div>
-                
-                <button class="btn btn-save" onclick="actualizarDatosBasicos()">ACTUALIZAR UBICACIÓN</button>
-                <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
-                
-                <button class="btn btn-action" onclick="openModal('modal-tienda')">⚙️ PERSONALIZACIÓN AVANZADA</button>
-            </div>
-
-            <!-- PANEL DERECHO: PRODUCTOS -->
-            <div class="card">
-                <h2>📦 Catálogo de Productos</h2>
-                <button class="btn btn-product" onclick="openModal('modal-producto')">+ AGREGAR NUEVO PRODUCTO</button>
-                
-                <div id="lista-productos" class="product-list">
-                    <!-- Productos cargados desde Firestore -->
-                </div>
-            </div>
-        </div>
+    <div class="card">
+        <h1>Bienvenido, <span id="shop-name">...</span></h1>
+        <button onclick="window.cerrarSesion()" style="background:#e74c3c; color:white; border:none; padding:10px">Salir</button>
     </div>
 
-    <!-- MODALES (Tienda y Producto) -->
-    <div id="modal-tienda" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('modal-tienda')">&times;</span>
-            <h2>Configuración de Tienda</h2>
-            <div class="form-group"><label>URL LOGO</label><input type="text" id="store-logo"></div>
-            <div class="form-group"><label>HORARIOS</label><input type="text" id="store-hours"></div>
-            <div class="form-group"><label>LINK GPS</label><input type="text" id="store-geo"></div>
-            <div class="form-group">
-                <label>URGENCIAS</label>
-                <select id="store-emergency">
-                    <option value="no">No</option>
-                    <option value="si">Sí (24h)</option>
-                </select>
-            </div>
-            <button class="btn btn-save" onclick="guardarConfigTienda()">GUARDAR CAMBIOS</button>
-        </div>
+    <div class="card" style="margin-top:20px">
+        <h3>Añadir Producto</h3>
+        <input type="text" id="p-nombre" placeholder="Nombre Producto">
+        <input type="number" id="p-precio" placeholder="Precio">
+        <button onclick="window.addProd()" style="background:#27ae60; color:white; padding:10px">Publicar</button>
     </div>
 
-    <div id="modal-producto" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('modal-producto')">&times;</span>
-            <h2 id="modal-producto-titulo">Nuevo Producto</h2>
-            <input type="hidden" id="prod-id"> <!-- ID oculto para edición -->
-            <div class="form-group"><label>NOMBRE</label><input type="text" id="prod-nombre"></div>
-            <div class="form-group"><label>PRECIO ($)</label><input type="number" id="prod-precio"></div>
-            <div class="form-group"><label>URL IMAGEN</label><input type="text" id="prod-img"></div>
-            <button class="btn btn-save" id="btn-subir-prod" onclick="subirOEditarProducto()">GUARDAR PRODUCTO</button>
-        </div>
-    </div>
+    <div id="mis-productos" class="product-grid"></div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, query, where, getDocs, doc, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, addDoc, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const usuarioLogueado = localStorage.getItem("sesion");
-        const tipoUsuario = localStorage.getItem("tipo");
-        let docIdActual = null;
+        const id = localStorage.getItem("comercioId");
+        document.getElementById('shop-name').innerText = localStorage.getItem("comercioNombre");
 
-        if (!usuarioLogueado || tipoUsuario !== "comercio") window.location.href = 'login.html';
-
-        window.openModal = (id) => {
-            if(id === 'modal-producto') { // Resetear modal al abrir para nuevo
-                document.getElementById('modal-producto-titulo').innerText = "Nuevo Producto";
-                document.getElementById('prod-id').value = "";
-                document.getElementById('prod-nombre').value = "";
-                document.getElementById('prod-precio').value = "";
-                document.getElementById('prod-img').value = "";
-            }
-            document.getElementById(id).style.display = 'block';
-        };
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-
-        const inicializarPanel = async () => {
-            const q = query(collection(db, "comercios"), where("usuario", "==", usuarioLogueado));
-            const snap = await getDocs(q);
-            snap.forEach((d) => {
-                docIdActual = d.id;
-                const data = d.data();
-                document.getElementById('comercio-nombre').innerText = data.nombre;
-                document.getElementById('edit-nombre').value = data.nombre || '';
-                document.getElementById('edit-direccion').value = data.direccion || '';
-                document.getElementById('edit-whatsapp').value = data.whatsapp || '';
-                document.getElementById('store-logo').value = data.logo || '';
-                document.getElementById('store-hours').value = data.horario || '';
-                document.getElementById('store-geo').value = data.geolocalizacion || '';
-                document.getElementById('store-emergency').value = data.atiendeEmergencia || 'no';
+        window.addProd = async () => {
+            await addDoc(collection(db, "productos"), {
+                nombre: document.getElementById('p-nombre').value,
+                precio: document.getElementById('p-precio').value,
+                comercioId: id
             });
-            cargarProductos();
+            location.reload();
         };
 
-        window.subirOEditarProducto = async () => {
-            const id = document.getElementById('prod-id').value;
-            const data = {
-                comercioUsuario: usuarioLogueado,
-                nombre: document.getElementById('prod-nombre').value,
-                precio: document.getElementById('prod-precio').value,
-                imagen: document.getElementById('prod-img').value || 'https://via.placeholder.com/150'
-            };
-
-            try {
-                if (id) { // EDITAR
-                    await updateDoc(doc(db, "productos", id), data);
-                    alert("Producto actualizado");
-                } else { // NUEVO
-                    await addDoc(collection(db, "productos"), data);
-                    alert("Producto agregado");
-                }
-                closeModal('modal-producto');
-                cargarProductos();
-            } catch (e) { alert("Error en la operación"); }
-        };
-
-        window.eliminarProducto = async (id) => {
-            if (confirm("¿Eliminar este producto?")) {
-                await deleteDoc(doc(db, "productos", id));
-                cargarProductos();
-            }
-        };
-
-        window.prepararEdicion = (id, nombre, precio, imagen) => {
-            document.getElementById('modal-producto-titulo').innerText = "Editar Producto";
-            document.getElementById('prod-id').value = id;
-            document.getElementById('prod-nombre').value = nombre;
-            document.getElementById('prod-precio').value = precio;
-            document.getElementById('prod-img').value = imagen;
-            document.getElementById('modal-producto').style.display = 'block';
-        };
-
-        const cargarProductos = async () => {
-            const q = query(collection(db, "productos"), where("comercioUsuario", "==", usuarioLogueado));
+        const cargarProds = async () => {
+            const q = query(collection(db, "productos"), where("comercioId", "==", id));
             const snap = await getDocs(q);
-            const lista = document.getElementById('lista-productos');
-            lista.innerHTML = "";
+            const container = document.getElementById('mis-productos');
             snap.forEach(d => {
-                const p = d.data();
-                lista.innerHTML += `
-                    <div class="product-card">
-                        <img src="${p.imagen}">
-                        <h4>${p.nombre}</h4>
-                        <p>$${p.precio}</p>
-                        <button class="btn-save" style="padding:5px; font-size:0.7rem;" onclick="prepararEdicion('${d.id}','${p.nombre}','${p.precio}','${p.imagen}')">Editar</button>
-                        <button class="btn-delete" onclick="eliminarProducto('${d.id}')">Eliminar</button>
-                    </div>`;
+                container.innerHTML += `<div class="p-card"><h4>${d.data().nombre}</h4><p>$${d.data().precio}</p>
+                    <button onclick="window.eliminar('${d.id}')" style="color:red">Eliminar</button></div>`;
             });
         };
 
-        window.actualizarDatosBasicos = async () => {
-            await updateDoc(doc(db, "comercios", docIdActual), {
-                nombre: document.getElementById('edit-nombre').value,
-                direccion: document.getElementById('edit-direccion').value,
-                whatsapp: document.getElementById('edit-whatsapp').value
-            });
-            alert("Ubicación actualizada");
-        };
-
-        window.guardarConfigTienda = async () => {
-            await updateDoc(doc(db, "comercios", docIdActual), {
-                logo: document.getElementById('store-logo').value,
-                horario: document.getElementById('store-hours').value,
-                geolocalizacion: document.getElementById('store-geo').value,
-                atiendeEmergencia: document.getElementById('store-emergency').value
-            });
-            alert("Tienda personalizada");
-            closeModal('modal-tienda');
-        };
-
-        window.cerrarSesion = () => { localStorage.clear(); window.location.href = 'login.html'; };
-        inicializarPanel();
+        window.eliminar = async (pid) => { if(confirm("¿Borrar?")){ await deleteDoc(doc(db, "productos", pid)); location.reload(); } };
+        window.cerrarSesion = () => { localStorage.clear(); window.location.href = "login.html"; };
+        
+        cargarProds();
     </script>
 </body>
 </html>
