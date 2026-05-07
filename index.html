@@ -2,70 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DÓNDE COMPRO - Productos Cercanos</title>
+    <title>DÓNDE COMPRO - Inicio</title>
     <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #f39c12; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); text-align: center; }
-        header { background: var(--primary); color: white; padding: 60px 20px; position: relative; }
-        .admin-access { position: absolute; top: 20px; right: 20px; }
-        .btn-login { color: white; text-decoration: none; border: 1px solid white; padding: 8px 15px; border-radius: 5px; font-size: 0.8rem; }
-        .search-box { max-width: 600px; margin: -30px auto 20px; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; gap: 5px; }
-        .search-box input { flex: 1; border: none; padding: 10px; outline: none; }
-        .btn-reg { display: inline-block; background: var(--accent); color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; margin-top: 40px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; text-align: left; }
-        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); }
+        .hero { 
+            height: 400px; background-size: cover; background-position: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .nav-top { position: absolute; top: 20px; right: 20px; }
+        .btn-access { background: rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; border: 1px solid white; }
     </style>
 </head>
 <body>
-    <header>
-        <div class="admin-access"><a href="login.html" class="btn-login">👤 ACCESO</a></div>
-        <h1>DÓNDE COMPRO</h1>
-        <p>Encuentra lo que necesitas cerca de ti</p>
-    </header>
-
-    <div class="search-box">
-        <input type="text" placeholder="¿Qué buscas? (ej: pan, medicina, herramientas)">
-        <button style="background:var(--secondary); color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">BUSCAR</button>
+    <div class="nav-top">
+        <a href="login.html" class="btn-access">Acceso Comerciantes</a>
     </div>
 
-    <a href="javascript:void(0)" class="btn-reg" onclick="document.getElementById('modal').style.display='flex'">📢 REGISTRA TU COMERCIO</a>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <h2>Nueva Solicitud</h2>
-            <input type="text" id="reg-nombre" placeholder="Nombre del Comercio">
-            <input type="email" id="reg-usuario" placeholder="Tu Email (será tu usuario)">
-            <input type="password" id="reg-pass" placeholder="Crea una contraseña">
-            <input type="text" id="reg-whatsapp" placeholder="WhatsApp (ej: 3876...)">
-            <button onclick="enviar()" style="width:100%; padding:15px; background:var(--secondary); color:white; border:none; border-radius:5px; font-weight:bold; cursor:pointer; margin-top:10px;">ENVIAR SOLICITUD</button>
-            <button onclick="document.getElementById('modal').style.display='none'" style="width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Cancelar</button>
+    <header id="main-header" class="hero">
+        <img id="main-logo" src="" alt="Logo" style="max-width: 150px; margin-bottom: 20px;">
+        <h1>¿Qué estás buscando hoy?</h1>
+        <div class="search-box">
+            <input type="text" id="busqueda" placeholder="Ej: Pan, Leche, Baterías...">
+            <button onclick="buscar()">Buscar</button>
         </div>
-    </div>
+    </header>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        window.enviar = async () => {
-            const datos = {
-                nombre: document.getElementById('reg-nombre').value.trim(),
-                usuario: document.getElementById('reg-usuario').value.trim().toLowerCase(), // Unificado
-                pass: document.getElementById('reg-pass').value.trim(),
-                whatsapp: document.getElementById('reg-whatsapp').value.trim(),
-                estado: "pendiente",
-                fecha: new Date().toLocaleString()
-            };
-
-            if(!datos.usuario || !datos.pass) return alert("Completa usuario y contraseña");
-
-            try {
-                await addDoc(collection(db, "solicitudes"), datos);
-                alert("Solicitud enviada. Espera la activación del administrador.");
-                location.reload();
-            } catch (e) { alert("Error al conectar."); }
-        };
+        async function cargarApariencia() {
+            const snap = await getDoc(doc(db, "configuracion", "apariencia"));
+            if(snap.exists()){
+                const cfg = snap.data();
+                if(cfg.logo) document.getElementById('main-logo').src = cfg.logo;
+                if(cfg.fondo_inicio) document.getElementById('main-header').style.backgroundImage = `url('${cfg.fondo_inicio}')`;
+            }
+        }
+        cargarApariencia();
     </script>
 </body>
 </html>
