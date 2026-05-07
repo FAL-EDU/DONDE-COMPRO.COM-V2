@@ -2,165 +2,106 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Master Admin - Dónde Compro</title>
     <style>
         :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 250px; background: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px; }
-        .sidebar h2 { font-size: 1.2rem; margin-bottom: 30px; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; }
-        .nav-link { color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; cursor: pointer; transition: 0.3s; }
-        .nav-link:hover, .nav-link.active { background: var(--secondary); color: white; }
-        .main-content { flex: 1; overflow-y: auto; padding: 30px; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 250px; background: var(--primary); color: white; padding: 20px; }
+        .nav-link { padding: 15px; cursor: pointer; display: block; color: #bdc3c7; text-decoration: none; }
+        .nav-link:hover, .active { background: var(--secondary); color: white; }
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
         .section.active { display: block; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; background: #f8f9fa; padding: 12px; color: var(--primary); }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-add { background: var(--accent); color: white; margin-bottom: 15px; }
-        .btn-del { background: var(--danger); color: white; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        table { width: 100%; background: white; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; }
     </style>
-
     <script>
-        /* NAVEGACIÓN GLOBAL - Funciona incluso si Firebase falla */
-        window.showSection = function(id) {
+        window.showSection = (id) => {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            const target = document.getElementById(id);
-            if(target) target.classList.add('active');
-            if(event && event.currentTarget) event.currentTarget.classList.add('active');
+            document.getElementById(id).classList.add('active');
         };
-
-        window.cerrarSesion = function() {
-            if(confirm("¿Seguro que deseas salir?")) {
-                window.location.href = "index.html";[cite: 4]
-            }
-        };
-
-        window.abrirModalRubro = () => document.getElementById('modal-rubro').style.display='flex';
-        window.cerrarModalRubro = () => document.getElementById('modal-rubro').style.display='none';
+        window.cerrarSesion = () => { localStorage.clear(); window.location.href = 'index.html'; };
     </script>
 </head>
 <body>
-
     <div class="sidebar">
-        <h2>ADMIN CONTROL</h2>
-        <div class="nav-link active" onclick="showSection('solicitudes')">📩 Solicitudes</div>
-        <div class="nav-link" onclick="showSection('comercios')">🏪 Comercios Activos</div>
-        <div class="nav-link" onclick="showSection('rubros')">🏷️ Gestionar Rubros</div>
-        <div class="nav-link" onclick="showSection('config')">⚙️ Configuración / Logo</div>
-        <div style="margin-top: auto;">
-            <button onclick="cerrarSesion()" class="btn btn-del" style="width: 100%;">Cerrar Sesión</button>
-        </div>
+        <h2>ADMIN</h2>
+        <div class="nav-link" onclick="showSection('solicitudes')">📩 Solicitudes</div>
+        <div class="nav-link" onclick="showSection('rubros')">🏷️ Rubros</div>
+        <div class="nav-link" onclick="showSection('config')">🎨 Apariencia</div>
+        <button onclick="cerrarSesion()" style="margin-top:20px; background:var(--danger); color:white; border:none; padding:10px; width:100%">Cerrar</button>
     </div>
 
-    <div class="main-content">
-        <!-- SECCIÓN SOLICITUDES -->
+    <div class="main">
         <div id="solicitudes" class="section active">
-            <div class="card">
-                <h2>Solicitudes Pendientes</h2>
-                <table>
-                    <thead><tr><th>Comercio</th><th>Usuario</th><th>Acciones</th></tr></thead>
-                    <tbody id="lista-solicitudes"><tr><td colspan="3">Cargando...</td></tr></tbody>
-                </table>
-            </div>
+            <h2>Solicitudes Pendientes</h2>
+            <table>
+                <thead><tr><th>Comercio</th><th>WhatsApp</th><th>Acción</th></tr></thead>
+                <tbody id="lista-sol"></tbody>
+            </table>
         </div>
 
-        <!-- SECCIÓN RUBROS -->
         <div id="rubros" class="section">
-            <div class="card">
-                <h2>Gestión de Rubros</h2>
-                <button class="btn btn-add" onclick="abrirModalRubro()">+ Nuevo Rubro</button>
-                <table id="tabla-rubros">
-                    <thead><tr><th>Nombre</th><th>Acciones</th></tr></thead>
-                    <tbody id="lista-rubros"></tbody>
-                </table>
-            </div>
+            <h2>Gestión de Rubros</h2>
+            <input type="text" id="new-rubro" placeholder="Nombre rubro">
+            <button onclick="window.addRubro()" style="background:var(--accent); color:white; padding:10px">Añadir</button>
+            <ul id="lista-rubros" style="margin-top:20px"></ul>
         </div>
 
-        <!-- SECCIÓN CONFIGURACIÓN -->
         <div id="config" class="section">
-            <div class="card">
-                <h2>Personalización de la APP</h2>
-                <label>URL del Logo</label>
-                <input type="text" id="app-logo" placeholder="https://ejemplo.com/logo.png">
-                <label>URL Imagen Fondo de Agua (FrontPage)</label>
-                <input type="text" id="app-watermark" placeholder="https://ejemplo.com/fondo.jpg">
-                <button class="btn btn-add" onclick="window.guardarConfig()">Guardar Cambios</button>
-            </div>
+            <h2>Personalización Visual</h2>
+            <label>URL Logo:</label>
+            <input type="text" id="cfg-logo" style="width:100%; padding:10px; margin:10px 0">
+            <label>URL Fondo de Agua (Inicio):</label>
+            <input type="text" id="cfg-fondo" style="width:100%; padding:10px; margin:10px 0">
+            <button onclick="window.saveConfig()" style="background:var(--accent); color:white; padding:15px; width:100%">Guardar Diseño</button>
         </div>
     </div>
 
-    <div id="modal-rubro" class="modal">
-        <div class="modal-content">
-            <h3>Añadir Nuevo Rubro</h3>
-            <input type="text" id="nuevo-rubro-nombre" placeholder="Ej: Veterinaria">
-            <button class="btn btn-add" style="width: 100%;" onclick="window.guardarRubro()">GUARDAR RUBRO</button>
-            <button class="btn" style="width: 100%; background: none;" onclick="cerrarModalRubro()">Cancelar</button>
-        </div>
-    </div>
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        window.addRubro = async () => {
+            const n = document.getElementById('new-rubro').value;
+            if(n) { await setDoc(doc(db, "rubros", n.toLowerCase()), { nombre: n }); location.reload(); }
+        };
 
-    /* CONFIGURACIÓN - REVISA BIEN LAS COMILLAS Y DOS PUNTOS AQUÍ */
-    const firebaseConfig = {
-        apiKey: "AIzaSyBYdnEmzLEV6aroL1uNBNrkWdfEGpSDHkw",
-        authDomain: "donde-compro-oficial.firebaseapp.com",
-        projectId: "donde-compro-oficial",
-        storageBucket: "donde-compro-oficial.firebasestorage.app",
-        messagingSenderId: "113447539181",
-        appId: "1:113447539181:web:6d91fc4fe96bb83d82d7e4"
-    };
+        window.saveConfig = async () => {
+            await setDoc(doc(db, "configuracion", "apariencia"), { 
+                logo: document.getElementById('cfg-logo').value,
+                fondo_inicio: document.getElementById('cfg-fondo').value 
+            });
+            alert("¡Diseño Guardado!");
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        const cargarTodo = async () => {
+            // Cargar Solicitudes
+            const solSnap = await getDocs(collection(db, "solicitudes"));
+            const tbody = document.getElementById('lista-sol');
+            solSnap.forEach(d => {
+                const s = d.data();
+                tbody.innerHTML += `<tr><td>${s.nombre}</td><td>${s.whatsapp}</td>
+                    <td><button onclick="window.aprobar('${d.id}')" class="btn" style="background:var(--accent)">Aprobar</button></td></tr>`;
+            });
+            // Cargar Config actual
+            const cfg = await getDoc(doc(db, "configuracion", "apariencia"));
+            if(cfg.exists()){
+                document.getElementById('cfg-logo').value = cfg.data().logo || "";
+                document.getElementById('cfg-fondo').value = cfg.data().fondo_inicio || "";
+            }
+        };
 
-    /* FUNCIONES DE FIREBASE ASIGNADAS A WINDOW */
-    window.guardarRubro = async () => {
-        const nombre = document.getElementById('nuevo-rubro-nombre').value.trim();
-        if(!nombre) return;
-        try {
-            await setDoc(doc(db, "rubros", nombre.toLowerCase()), { nombre: nombre });[cite: 3]
-            document.getElementById('nuevo-rubro-nombre').value = "";
-            window.cerrarModalRubro();
-            alert("Rubro guardado!");
-            cargarDatos();
-        } catch (e) { alert("Error al guardar: " + e.message); }
-    };
+        window.aprobar = async (id) => {
+            const snap = await getDoc(doc(db, "solicitudes", id));
+            await setDoc(doc(db, "comercios", id), snap.data());
+            await deleteDoc(doc(db, "solicitudes", id));
+            alert("Comercio activado con éxito.");
+            location.reload();
+        };
 
-    window.guardarConfig = async () => {
-        const logo = document.getElementById('app-logo').value;
-        const watermark = document.getElementById('app-watermark').value;
-        try {
-            await setDoc(doc(db, "configuracion", "general"), { logo, watermark });[cite: 2, 3]
-            alert("Configuración actualizada.");
-        } catch (e) { alert("Error: " + e.message); }
-    };
-
-    const cargarDatos = async () => {
-        const snap = await getDocs(collection(db, "rubros"));[cite: 3]
-        const lista = document.getElementById('lista-rubros');
-        lista.innerHTML = "";
-        snap.forEach(d => {
-            lista.innerHTML += `<tr><td>${d.data().nombre}</td><td><button onclick="window.eliminarRubro('${d.id}')" class="btn btn-del">Eliminar</button></td></tr>`;
-        });
-    };
-
-    window.eliminarRubro = async (id) => {
-        if(confirm("¿Eliminar?")) {
-            await deleteDoc(doc(db, "rubros", id));[cite: 3]
-            cargarDatos();
-        }
-    };
-
-    cargarDatos();
-</script>
+        cargarTodo();
+    </script>
 </body>
 </html>
